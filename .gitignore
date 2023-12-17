@@ -8,7 +8,7 @@ __pycache__/
 *.pyd
 
 # Virtual environment
-venv/
+.venv/
 
 # Visual Studio Code
 .vscode/
