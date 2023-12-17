@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+
+# Visual Studio Code
+.vscode/
+
+# Django
+*.log
+db.sqlite3
+/media/
+
+# System and temporary files
+Thumbs.db
+.DS_Store
+
+# Local development settings
+.env
