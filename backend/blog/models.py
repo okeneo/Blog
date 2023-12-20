@@ -13,7 +13,7 @@ class ProfileUser(AbstractUser):
         (ADMIN, ADMIN),
         (READER, READER),
     )
-    role = models.CharField(max_length=9, choices=ROLE_CHOICES, default=READER)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=READER)
     bio = models.CharField(max_length=240, blank=True)
 
     def __str__(self):
