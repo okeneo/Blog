@@ -1,9 +1,5 @@
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Group, Permission
-from django.core.exceptions import ValidationError
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-# from .permissions import PostPermissions
 
 
 class ProfileUser(AbstractUser):
@@ -22,27 +18,6 @@ class ProfileUser(AbstractUser):
 
     def __str__(self):
         return self.username
-
-    # def save(self, *args, **kwargs):
-    #     if self.role not in dict(self.ROLE_CHOICES).keys():
-    #         raise ValidationError("Invalid role.")
-
-    #     group_name = self.get_role_display()
-    #     group, created = Group.objects.get_or_create(name=group_name)
-    #     if created:
-    #         if self.role == self.AUTHOR:
-    #             group.permissions.add(
-    #                 Permission.objects.get(codename="can_create_post"),
-    #                 Permission.objects.get(codename="can_update_post"),
-    #                 Permission.objects.get(codename="can_delete_post"),
-    #                 Permission.objects.get(codename="can_publish_post"),
-    #             )
-    #         elif self.role == self.ADMIN:
-    #             group.permissions.add(
-    #                 Permission.objects.get(codename="can_update_post"),
-    #                 Permission.objects.get(codename="can_delete_post"),
-    #                 Permission.objects.get(codename="can_publish_post"),
-    #             )
 
 
 class Tag(models.Model):
