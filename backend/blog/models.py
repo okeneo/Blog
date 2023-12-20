@@ -17,7 +17,7 @@ class ProfileUser(AbstractUser):
     bio = models.CharField(max_length=240, blank=True)
 
     def __str__(self):
-        return self.username
+        return self.username or self.email
 
 
 class Tag(models.Model):
@@ -32,6 +32,9 @@ class Tag(models.Model):
 
     name = models.CharField(max_length=20, choices=TAG_CHOICES, unique=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Category(models.Model):
     TECHNOLOGY = "Technology"
@@ -43,11 +46,14 @@ class Category(models.Model):
 
     name = models.CharField(max_length=20, choices=CATEGORY_CHOICES, unique=True)
 
+    class Meta:
+        verbose_name_plural = "Categories"
+
+    def __str__(self):
+        return self.name
+
 
 class Post(models.Model):
-    class Meta:
-        ordering = ["-publish_date"]
-
     title = models.CharField(max_length=255, unique=True)
     subtitle = models.CharField(max_length=255, blank=True)
     slug = models.SlugField(max_length=255, unique=True)
@@ -61,3 +67,9 @@ class Post(models.Model):
     author = models.ForeignKey(ProfileUser, on_delete=models.PROTECT)
     tags = models.ManyToManyField(Tag, blank=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
+
+    class Meta:
+        ordering = ["-publish_date"]
+
+    def __str__(self):
+        return self.title
