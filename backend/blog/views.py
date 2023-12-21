@@ -43,7 +43,7 @@ class PostDetailView(APIView):
         # TODO: Check that the user is logged in.
         # TODO: Check that the user is an admin or the author of the post.
         post = get_object_or_404(Post, pk=pk)
-        serializer = PostSerializer(post, data=request.data)
+        serializer = PostSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
