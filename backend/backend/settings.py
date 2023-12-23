@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "blog",
+    "apps.blog",
+    "apps.account",
+    "apps.post",
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
@@ -136,7 +138,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "blog.ProfileUser"
+AUTH_USER_MODEL = "apps.account.UserProfile"
 
 # Whitelist server addresses to prevent errors due to CORS rules.
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]

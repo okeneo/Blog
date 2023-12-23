@@ -1,27 +1,7 @@
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
-
-
-class ProfileUser(AbstractUser):
-    """Custom user in the system. This user can be an author, admin or reader."""
-
-    AUTHOR = "AUTHOR"
-    ADMIN = "ADMIN"
-    READER = "READER"
-    ROLE_CHOICES = (
-        (AUTHOR, AUTHOR),
-        (ADMIN, ADMIN),
-        (READER, READER),
-    )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=READER)
-    bio = models.CharField(max_length=240, blank=True)
-
-    def __str__(self):
-        return self.username or self.email
+from django.db.models.signals import pre_save
+from django.utils.text import slugify
+from account.models import UserProfile
 
 
 class Tag(models.Model):
@@ -60,7 +40,7 @@ class Category(models.Model):
 class Post(models.Model):
     title = models.CharField(max_length=255, unique=True)
     subtitle = models.CharField(max_length=255, blank=True)
-    slug = models.SlugField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, blank=True, unique=True)
     body = models.TextField()
     meta_description = models.CharField(max_length=150, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -68,7 +48,7 @@ class Post(models.Model):
     publish_date = models.DateTimeField(blank=True, null=True)
     published = models.BooleanField(default=False)
 
-    author = models.ForeignKey(ProfileUser, on_delete=models.PROTECT)
+    author = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
     tags = models.ManyToManyField(Tag, blank=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
 
@@ -79,7 +59,9 @@ class Post(models.Model):
         return self.title
 
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
+def pre_save_blog_post_receiver(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.title)
+
+
+pre_save.connect(receiver=pre_save_blog_post_receiver, sender=Post)
