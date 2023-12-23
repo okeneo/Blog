@@ -24,3 +24,6 @@ Thumbs.db
 
 # Local development settings
 .env
+
+# Personal project notes
+Notes.md
