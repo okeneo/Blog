@@ -10,8 +10,8 @@ User = get_user_model()
 class GenerateTokensTest(TestCase):
     def setUp(self):
         # Create test users.
-        self.user1 = User.objects.create_user(username="user1", password="password1")
-        self.user2 = User.objects.create_user(username="user2", password="password2")
+        self.user_1 = User.objects.create_user(username="user_1", password="password_1")
+        self.user_2 = User.objects.create_user(username="user_2", password="password_2")
 
     def test_command_output(self):
         out = StringIO()
