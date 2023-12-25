@@ -1,16 +1,16 @@
-# Blog
-Personal blog.
+# PersonalNest
+Includes a blog.
 ## Setup for local development
 
 ### Set up a virtual environment
 ```shell script
-python -m venv venv/
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 ```
 
 ### Install Dependencies
 ```shell script
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### Migrate Database
