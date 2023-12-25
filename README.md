@@ -1,4 +1,4 @@
-# PersonalNest
+# Personal Website
 Includes a blog.
 ## Setup for local development
 
