@@ -17,8 +17,8 @@ class GenerateTokensTest(TestCase):
         out.close()
 
         # Create new users.
-        user_1 = User.objects.create_user(username="user_1", password="password_1")
-        user_2 = User.objects.create_user(username="user_2", password="password_2")
+        user_1 = User.objects.create_user(username="user_1", password="password1")
+        user_2 = User.objects.create_user(username="user_2", password="password2")
 
         # Test with valid users.
         out = StringIO()
@@ -37,8 +37,8 @@ class GenerateTokensTest(TestCase):
         should not have any new tokens created (by the management script) for these new users,
         as they should have been created by the post_save signal."""
         # Create new users.
-        user_1 = User.objects.create_user(username="user_1", password="password_1")
-        user_2 = User.objects.create_user(username="user_2", password="password_2")
+        user_1 = User.objects.create_user(username="user_1", password="password1")
+        user_2 = User.objects.create_user(username="user_2", password="password2")
 
         out = StringIO()
         call_command("generate_tokens", stdout=out)
