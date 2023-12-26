@@ -10,6 +10,9 @@ from .serializers import PostSerializer
 
 
 class PostListView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, *args, **kwargs):
         """Get all posts."""
         posts = Post.objects.all()
@@ -19,12 +22,8 @@ class PostListView(APIView):
     def post(self, request, *args, **kwargs):
         """Create a new post.
 
-        Note: The user must be looged in and be an author.
+        Note: The user must be logged in and be an author.
         """
-        authentication_classes = [
-            TokenAuthentication,
-        ]
-        permission_classes = [IsAuthenticated]
         # TODO: Check that the user is logged in.
         # TODO: Check that the user has the author role.
         serializer = PostSerializer(data=request.data)
@@ -33,8 +32,17 @@ class PostListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def get_permissions(self):
+        """Ignore permissions on GET requests. We want anyone to be able to access all posts."""
+        if self.request.method == "GET":
+            return []
+        return super().get_permissions()
+
 
 class PostDetailView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, pk, *args, **kwargs):
         """Get a post."""
         post = get_object_or_404(Post, pk=pk)
@@ -69,3 +77,9 @@ class PostDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({"error": "Unauthorized access."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def get_permissions(self):
+        """Ignore permissions on GET requests. We want anyone to be able to access a post."""
+        if self.request.method == "GET":
+            return []
+        return super().get_permissions()

@@ -2,11 +2,15 @@ from account.models import UserProfile
 from rest_framework import serializers
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserSignUpSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, required=True)
     username = serializers.CharField(required=True)
-    password1 = serializers.CharField(style={"input_type": "password"}, required=True)
-    password2 = serializers.CharField(style={"input_type": "password"}, required=True)
+    password1 = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
+    password2 = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
 
     class Meta:
         model = UserProfile
@@ -59,3 +63,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    pass
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = (
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "role",
+        )
