@@ -37,14 +37,6 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         password1 = data.get("password1")
         password2 = data.get("password2")
 
-        if not email:
-            raise serializers.ValidationError("Email is required.")
-        if not username:
-            raise serializers.ValidationError("Username is required.")
-        if not password1:
-            raise serializers.ValidationError("Password is required.")
-        if not password2:
-            raise serializers.ValidationError("Confirmation password is required.")
         if password1 != password2:
             raise serializers.ValidationError("Passwords do not match.")
 
@@ -66,7 +58,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
-    pass
+    email = serializers.EmailField(max_length=255)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
