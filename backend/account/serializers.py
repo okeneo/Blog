@@ -1,11 +1,12 @@
 from account.models import UserProfile
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, required=True)
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(max_length=150, required=True)
     password1 = serializers.CharField(
         style={"input_type": "password"}, required=True, write_only=True
     )
@@ -32,18 +33,26 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         except UserProfile.DoesNotExist:
             return username
 
+    def validate_password1(self, password1):
+        try:
+            validate_password(password1)
+        except ValueError as e:
+            raise serializers.ValidationError(str(e))
+        return password1
+
     def validate(self, data):
         email = data.get("email")
         username = data.get("username")
         password1 = data.get("password1")
         password2 = data.get("password2")
 
-        if password1 != password2:
-            raise serializers.ValidationError("Passwords do not match.")
-
         # Extra validation for email and username.
         self.validate_email(email)
         self.validate_username(username)
+        self.validate_password1(password1)
+
+        if password1 != password2:
+            raise serializers.ValidationError("Passwords do not match.")
 
         return data
 
@@ -60,7 +69,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
 class UserLoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, required=False)
-    username = serializers.CharField(required=False)
+    username = serializers.CharField(max_length=150, required=False)
     password = serializers.CharField(
         style={"input_type": "password"}, required=True, write_only=True
     )
