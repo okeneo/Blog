@@ -23,14 +23,11 @@ class SignUpView(APIView):
 
 
 class LoginView(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-
     def post(self, request, *args, **kwargs):
         """Login a user."""
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data["user"]
+            user = serializer.validated_data
 
             # Get token.
             token, _ = Token.objects.get_or_create(user=user)

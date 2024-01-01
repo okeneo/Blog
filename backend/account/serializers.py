@@ -1,4 +1,5 @@
 from account.models import UserProfile
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 
@@ -58,7 +59,35 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=255)
+    email = serializers.EmailField(max_length=255, required=False)
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = ["email", "username"]
+
+    def validate(self, data):
+        email = data.get("email", None)
+        username = data.get("username", None)
+        password = data.get("password")
+
+        if email:
+            user = authenticate(request=self.context.get("request"), email=email, password=password)
+        elif username:
+            user = authenticate(
+                request=self.context.get("request"), username=username, password=password
+            )
+        else:
+            raise serializers.ValidationError("Username and email were not provided.")
+
+        if not user:
+            raise serializers.ValidationError("Invalid login credentials.")
+
+        data["user"] = user
+        return user
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

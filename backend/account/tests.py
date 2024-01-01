@@ -7,6 +7,11 @@ from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
+class RegisterUserTest(TestCase):
+    # Test creating a new user with a super long email. Does the max_length in the
+    # serializer provide a different max_length than in the model definiition?
+    # E.g., eamil
+    pass
 
 class GenerateTokensTest(TestCase):
     def test_command_with_args(self):

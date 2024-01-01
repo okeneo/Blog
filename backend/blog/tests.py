@@ -1,3 +1,6 @@
 from django.test import TestCase
 
-# Create your tests here.
+class TestCreateBlog(TestCase):
+    # Test using another user's tokem for a user? Does it matter? Idts.
+    # Pretty sure we can use another person's token.
+    pass
