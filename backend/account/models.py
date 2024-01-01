@@ -18,10 +18,11 @@ class UserProfile(AbstractUser):
         (READER, READER),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=READER)
-    bio = models.CharField(max_length=240, blank=True)
+    bio = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(max_length=255, unique=True, verbose_name="email address")
 
     def __str__(self):
-        return self.username or self.email
+        return self.username
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
