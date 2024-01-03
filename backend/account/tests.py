@@ -261,8 +261,18 @@ class LoginUserTest(TestCase):
         self.assertEqual(signup_token, login_token)
 
         # Test logging in a user that is already logged in.
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("error", response_data)
+        self.assertEqual("The user is already logged in.", response_data["error"])
+
+        # Make sure these tests would otherwise work. ********
 
         # Test logging in without password.
+
+        # Test logging with wrong password.
 
         # Test logging in without username.
 
