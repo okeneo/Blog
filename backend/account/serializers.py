@@ -1,6 +1,7 @@
 from account.models import UserProfile
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 
 
@@ -16,7 +17,12 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ["email", "username", "password1", "password2"]
+        fields = [
+            "email",
+            "username",
+            "password1",
+            "password2",
+        ]
 
     def validate_email(self, email):
         email = email.lower()
@@ -31,6 +37,12 @@ class UserSignUpSerializer(serializers.ModelSerializer):
             UserProfile.objects.get(username=username)
             raise serializers.ValidationError(f"The username '{username}' is already registered.")
         except UserProfile.DoesNotExist:
+            username_validator = UnicodeUsernameValidator()
+            try:
+                # Validate the username using the default User model username validator.
+                username_validator(username)
+            except ValueError as e:
+                raise serializers.ValidationError(str(e))
             return username
 
     def validate_password1(self, password1):
@@ -76,7 +88,11 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ["email", "username"]
+        fields = [
+            "email",
+            "username",
+            "password",
+        ]
 
     def validate(self, data):
         email = data.get("email", None)
@@ -102,10 +118,11 @@ class UserLoginSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = (
+        fields = [
             "email",
             "username",
             "first_name",
             "last_name",
             "role",
-        )
+            "bio",
+        ]
