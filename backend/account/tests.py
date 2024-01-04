@@ -8,6 +8,13 @@ from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
+# TODO: Create users via database API (not signup endpoint) except when testing RegisterUserTest.
+# Break tests into more functions - They are too long as it stands.
+# Isolate tests - A test should not depend on a previous test
+# Write a create method for creating users when needed
+# Look into setUpData documentation
+# More: https://chat.openai.com/c/b9fb938d-6d10-4ea5-b0c7-5a5073e46660
+
 
 class RegisterUserTest(TestCase):
     def setUp(self):
@@ -148,7 +155,7 @@ class RegisterUserTest(TestCase):
             response_data["username"],
         )
 
-        # Test creating a new user an invalid email.
+        # Test creating a new user with an invalid email.
         data = {
             "username": "validusername",
             "email": "newuser",
@@ -166,7 +173,7 @@ class RegisterUserTest(TestCase):
             response_data["email"],
         )
 
-        # Test creating a new user an invalid password.
+        # Test creating a new user with an invalid password.
         data = {
             "username": "new_user",
             "email": "newuser@gmail.com",
