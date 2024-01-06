@@ -1,12 +1,18 @@
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import UserProfile
-from .serializers import UserLoginSerializer, UserProfilePublicSerializer, UserSignUpSerializer
+from .serializers import (
+    UserLoginSerializer,
+    UserProfilePrivateSerializer,
+    UserProfilePublicSerializer,
+    UserSignUpSerializer,
+)
 
 
 class SignUpView(APIView):
@@ -52,29 +58,20 @@ class LogoutView(APIView):
 
 
 class UserProfileView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
     def get(self, request, username, *args, **kwargs):
         """Get the user profile."""
-        # TODO: A user should be able to view any user without being authenticated but...
+        user = get_object_or_404(UserProfile, username=username)
 
-        # TODO: In order to get more info (e.g., their email), they would need to be authenticated
-        # and need to be the user that is that made the request
-        # (i.e., username == request.user or user.role == admin)
-        print(request.user.__dict__)
-        # TODO: What does _isauthenticated really when for TokenAuthentication?
-        # print(request.user._isauthenticated)
-
-        user = UserProfile.objects.filter(username=username)
-        if not user:
-            return Response(
-                {"error": "Invalid credentials."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        serializer = UserProfilePublicSerializer(user)
-        if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        # A user must be authenticated and must either be the owner of the account,
+        # or they must have the admin role.
+        if request.user.is_authenticated:
+            ADMIN = UserProfile.ADMIN
+            if request.user == user or request.user.role == ADMIN:
+                serializer = UserProfilePrivateSerializer(user)
+            else:
+                serializer = UserProfilePublicSerializer(user)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Use the public serializer for non-authenticated users.
+            serializer = UserProfilePublicSerializer(user)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

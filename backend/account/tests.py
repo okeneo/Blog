@@ -291,6 +291,8 @@ class UserProfileTest(TestCase):
         self.url = "/blog/"
         self.client = Client()
 
+    # Test retrieving a user profile with different token and username combinations.
+
 
 class GenerateTokensTest(TestCase):
     def setUp(self):

@@ -99,12 +99,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         email = data.get("email", None)
-        # email = email.lower() - Should we do this?
         username = data.get("username", None)
         password = data.get("password")
 
         # We want to allow users to login with their username or email.
         if email:
+            # Convert email to lowercase to prevent
+            email = email.lower()
             user = authenticate(
                 request=self.context.get("request"), username=email, password=password
             )
@@ -123,9 +124,8 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
 
 class UserProfilePublicSerializer(serializers.ModelSerializer):
-    """The fields in this serializer represent information that can be viewed publicly."""
-
-    # Public to the system or the internet?
+    """The fields in this serializer represent data that can be viewed by anyone on the
+    internet."""
 
     class Meta:
         model = UserProfile
@@ -136,11 +136,10 @@ class UserProfilePublicSerializer(serializers.ModelSerializer):
 
 
 class UserProfilePrivateSerializer(serializers.ModelSerializer):
-    """The fields in this serializer represent information that only the user of the associated
+    """The fields in this serializer represent data that only the user of the associated
     account should have access to."""
 
-    # Should we use this serializer for user account updates?
-    # Will admins be able to use this serializer?
+    # TODO: Should we use this serializer for user account updates?
 
     class Meta:
         model = UserProfile
