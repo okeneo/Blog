@@ -30,12 +30,14 @@ class SignUpView(APIView):
 
 
 class LoginView(APIView):
+    """With TokenAuthentication, the concept of a user being logged in is not as
+    straightforward, as there is no server-side session management. Instead,
+    authentication relies on the presence and validity of the authentication
+    tokens included in each request.
+    """
+
     def post(self, request, *args, **kwargs):
         """Login a user."""
-        # With TokenAuthentication, the concept of a user being logged in is not as
-        # straightforward, as there is no server-side session management. Instead,
-        # authentication relies on the presence and validity of the authentication
-        # tokens included in each request.
 
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():

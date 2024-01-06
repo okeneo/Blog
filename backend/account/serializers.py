@@ -137,7 +137,7 @@ class UserProfilePublicSerializer(serializers.ModelSerializer):
 
 class UserProfilePrivateSerializer(serializers.ModelSerializer):
     """The fields in this serializer represent data that only the user of the associated
-    account should have access to."""
+    account, or users with the admin role should have access to."""
 
     # TODO: Should we use this serializer for user account updates?
 
