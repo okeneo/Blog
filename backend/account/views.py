@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import UserProfile
-from .serializers import UserLoginSerializer, UserProfileSerializer, UserSignUpSerializer
+from .serializers import UserLoginSerializer, UserProfilePublicSerializer, UserSignUpSerializer
 
 
 class SignUpView(APIView):
@@ -26,17 +26,10 @@ class SignUpView(APIView):
 class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         """Login a user."""
-        # Note that with TokenAuthentication, the concept of a user being logged in
-        # is not as straightforward, as there is no server-side session management.
-        # Instead, authentication relies on the presence and validity of authentication
+        # With TokenAuthentication, the concept of a user being logged in is not as
+        # straightforward, as there is no server-side session management. Instead,
+        # authentication relies on the presence and validity of the authentication
         # tokens included in each request.
-
-        # Check if the user is already logged in.
-        # TODO: Does the request have a tokem in it already? If yes, send a bad request.
-
-        # TODO: Compare this view with ObtainAuthToken.
-        # Are we checking _isauthenticated at all? Is this even required? What does this
-        # really check in the context of TokenAuthentication.
 
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -64,15 +57,10 @@ class UserProfileView(APIView):
 
     def get(self, request, username, *args, **kwargs):
         """Get the user profile."""
-        # Note that with TokenAuthentication, the concept of a user being logged in
-        # is not as straightforward, as there is no server-side session management.
-        # Instead, authentication relies on the presence and validity of authentication
-        # tokens included in each request.
+        # TODO: A user should be able to view any user without being authenticated but...
 
-        # TODO: A user should be able to view any user without being authenticated.
-
-        # TODO: In order to get more info (e.g., their email), they would need to be authenticated and
-        # need to be the user that is that made the request
+        # TODO: In order to get more info (e.g., their email), they would need to be authenticated
+        # and need to be the user that is that made the request
         # (i.e., username == request.user or user.role == admin)
         print(request.user.__dict__)
         # TODO: What does _isauthenticated really when for TokenAuthentication?
@@ -81,12 +69,11 @@ class UserProfileView(APIView):
         user = UserProfile.objects.filter(username=username)
         if not user:
             return Response(
-                {"error": f"The user with username '{username}' was not found"},
+                {"error": "Invalid credentials."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = UserProfileSerializer(data=user)
-        # TODO: 
+        serializer = UserProfilePublicSerializer(user)
         if serializer.is_valid():
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

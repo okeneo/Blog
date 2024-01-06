@@ -12,7 +12,7 @@ User = get_user_model()
 # Break tests into more functions - They are too long as it stands.
 # Isolate tests - A test should not depend on a previous test
 # Write a create method for creating users when needed
-# Look into setUpData documentation
+# Ensure that all tests would otherwise work.
 # More: https://chat.openai.com/c/b9fb938d-6d10-4ea5-b0c7-5a5073e46660
 
 
@@ -227,32 +227,14 @@ class LoginUserTest(TestCase):
         self.url = "/blog/login/"
         self.client = Client()
 
-    def test_login_users(self):
         # Create a new user.
-        data = {
-            "username": "new_user",
-            "email": "newuser@gmail.com",
-            "password1": "@123tza..",
-            "password2": "@123tza..",
-        }
-        json_data = json.dumps(data)
-        response = self.client.post(
-            "/blog/signup/", data=json_data, content_type="application/json"
+        self.user = User.objects.create_user(
+            username="new_user", email="newuser@gmail.com", password="@123tza.."
         )
 
-        self.assertEqual(response.status_code, 201)
-        response_data = json.loads(response.content)
-        self.assertIn("token", response_data)
-        self.assertIsNotNone(response_data["token"])
-        signup_token = response_data["token"]
-
-        # Test that the user instance was created in the database.
-        user = User.objects.filter(username="new_user", email="newuser@gmail.com").first()
-        self.assertIsNotNone(user)
-        self.assertEqual("new_user", user.username)
-        self.assertEqual("newuser@gmail.com", user.email)
-
+    def test_username_login(self):
         # Test logging in a user with their username.
+        self.signup_token = Token.objects.filter(user=self.user).first().key
         data = {
             "username": "new_user",
             "password": "@123tza..",
@@ -265,27 +247,37 @@ class LoginUserTest(TestCase):
         self.assertIn("token", response_data)
         self.assertIsNotNone(response_data["token"])
         login_token = response_data["token"]
-        self.assertEqual(signup_token, login_token)
+        self.assertEqual(self.signup_token, login_token)
 
-        # Test logging in a user that is already logged in.
+    def test_email_login(self):
+        # Test logging in a user with their email.
+        self.signup_token = Token.objects.filter(user=self.user).first().key
+        data = {
+            "email": "newuser@gmail.com",
+            "password": "@123tza..",
+        }
+        json_data = json.dumps(data)
         response = self.client.post(self.url, data=json_data, content_type="application/json")
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
-        self.assertIn("error", response_data)
-        self.assertEqual("The user is already logged in.", response_data["error"])
+        self.assertIn("token", response_data)
+        self.assertIsNotNone(response_data["token"])
+        login_token = response_data["token"]
+        self.assertEqual(self.signup_token, login_token)
 
-        # Make sure these tests would otherwise work. ********
+    # def test_login_users(self):
+    #     # Test logging in without password.
 
-        # Test logging in without password.
+    #     # Test logging with wrong password.
 
-        # Test logging with wrong password.
+    #     # Test logging in without username.
 
-        # Test logging in without username.
+    #     # Test logging in with a user that does not not exist.
 
-        # Test logging in with a user that does not not exist.
+    #     # Test logging in without email.
 
-        # Test logging in a user with their email.
+    #     # Test logging in with email that does not exist.
 
 
 class LogoutUserTest(TestCase):

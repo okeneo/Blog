@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
+    # The email is validated by the EmailField email validator.
     email = serializers.EmailField(max_length=255, required=True)
     username = serializers.CharField(max_length=150, required=True)
     password1 = serializers.CharField(
@@ -47,6 +48,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     def validate_password1(self, password1):
         try:
+            # Validate the password using the Django's built-in password validator.
             validate_password(password1)
         except ValueError as e:
             raise serializers.ValidationError(str(e))
@@ -80,6 +82,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
+    # The email is validated by the EmailField email validator.
     email = serializers.EmailField(max_length=255, required=False)
     username = serializers.CharField(max_length=150, required=False)
     password = serializers.CharField(
@@ -96,11 +99,15 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         email = data.get("email", None)
+        # email = email.lower() - Should we do this?
         username = data.get("username", None)
         password = data.get("password")
 
+        # We want to allow users to login with their username or email.
         if email:
-            user = authenticate(request=self.context.get("request"), email=email, password=password)
+            user = authenticate(
+                request=self.context.get("request"), username=email, password=password
+            )
         elif username:
             user = authenticate(
                 request=self.context.get("request"), username=username, password=password
@@ -115,14 +122,33 @@ class UserLoginSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfilePublicSerializer(serializers.ModelSerializer):
+    """The fields in this serializer represent information that can be viewed publicly."""
+
+    # Public to the system or the internet?
+
     class Meta:
         model = UserProfile
         fields = [
-            "email",
             "username",
+            "bio",
+        ]
+
+
+class UserProfilePrivateSerializer(serializers.ModelSerializer):
+    """The fields in this serializer represent information that only the user of the associated
+    account should have access to."""
+
+    # Should we use this serializer for user account updates?
+    # Will admins be able to use this serializer?
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "username",
+            "bio",
+            "email",
             "first_name",
             "last_name",
             "role",
-            "bio",
         ]
