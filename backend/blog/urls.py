@@ -5,6 +5,7 @@ urlpatterns = [
     path("signup/", SignUpView.as_view()),
     path("login/", LoginView.as_view()),
     path("logout/", LogoutView.as_view()),
+    # path("user/", GetCurrAuthorizedUser?),
     path("user/<str:username>/", UserProfileView.as_view(), name="user-profile"),
     path("post/", include("post.urls")),
 ]
