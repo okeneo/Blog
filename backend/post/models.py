@@ -1,6 +1,7 @@
 from account.models import UserProfile
 from django.db import models
 from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils.text import slugify
 
 
@@ -59,9 +60,7 @@ class Post(models.Model):
         return self.title
 
 
-def pre_save_blog_post_receiver(sender, instance, *args, **kwargs):
+@receiver(pre_save, sender=Post)
+def create_post_slug(sender, instance=None, created=False, **kwargs):
     if not instance.slug:
         instance.slug = slugify(instance.title)
-
-
-pre_save.connect(receiver=pre_save_blog_post_receiver, sender=Post)
