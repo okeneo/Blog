@@ -31,17 +31,19 @@ class RegisterView(APIView):
 
 class UserProfileView(APIView):
     def get(self, request, username, *args, **kwargs):
-        """Get the user profile."""
+        """Get the user profile.
+
+        The user must be logged in (authenticated) and must either be the owner of the account,
+        or have the admin role in order to see private data.
+        """
         user = get_object_or_404(UserProfile, username=username)
 
-        # A user must be authenticated (correspoding to the default authentication schemes,
-        # which is only JWT at the time of writing) and must either be the owner of the account,
-        # or have the admin role.
         if request.user.is_authenticated:
             ADMIN = UserProfile.ADMIN
             if request.user == user or request.user.role == ADMIN:
                 serializer = UserProfilePrivateSerializer(user)
             else:
+                # Use the public serializer for users that do not have the admin role.
                 serializer = UserProfilePublicSerializer(user)
         else:
             # Use the public serializer for non-authenticated users.
