@@ -60,6 +60,15 @@ class PostDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, pk, *args, **kwargs):
+        """Delete a post.
+
+        The user must be logged in (authenticated) and must be an admin or the author of the post.
+        """
+        post = get_object_or_404(Post, pk=pk)
+        post.delete()
+        return Response({"detail": "Post deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
 
 class PublishPostView(APIView):
     authentication_classes = (JWTAuthentication,)
@@ -79,20 +88,6 @@ class PublishPostView(APIView):
             return Response(
                 {"error": "The post is already published."}, status=status.HTTP_400_BAD_REQUEST
             )
-
-
-class DeletePostView(APIView):
-    authentication_classes = (JWTAuthentication,)
-    permission_classes = (ReadOnly | (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner))),)
-
-    def delete(self, request, pk, *args, **kwargs):
-        """Delete a post.
-
-        The user must be logged in (authenticated) and must be an admin or the author of the post.
-        """
-        post = get_object_or_404(Post, pk=pk)
-        post.delete()
-        return Response({"detail": "Post deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CategoryListView(ListAPIView):
