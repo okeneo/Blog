@@ -1,11 +1,10 @@
 from account.models import UserProfile
-from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 
 
-class UserSignUpSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
     # The email is validated by the EmailField email validator.
     email = serializers.EmailField(max_length=255, required=True)
     username = serializers.CharField(max_length=150, required=True)
@@ -81,48 +80,6 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserLoginSerializer(serializers.ModelSerializer):
-    # The email is validated by the EmailField email validator.
-    email = serializers.EmailField(max_length=255, required=False)
-    username = serializers.CharField(max_length=150, required=False)
-    password = serializers.CharField(
-        style={"input_type": "password"}, required=True, write_only=True
-    )
-
-    class Meta:
-        model = UserProfile
-        fields = [
-            "email",
-            "username",
-            "password",
-        ]
-
-    def validate(self, data):
-        email = data.get("email", None)
-        username = data.get("username", None)
-        password = data.get("password")
-
-        # We want to allow users to login with their username or email.
-        if email:
-            # Convert email to lowercase to prevent
-            email = email.lower()
-            user = authenticate(
-                request=self.context.get("request"), username=email, password=password
-            )
-        elif username:
-            user = authenticate(
-                request=self.context.get("request"), username=username, password=password
-            )
-        else:
-            raise serializers.ValidationError("Username and email were not provided.")
-
-        if not user:
-            raise serializers.ValidationError("Invalid login credentials.")
-
-        data["user"] = user
-        return user
-
-
 class UserProfilePublicSerializer(serializers.ModelSerializer):
     """The fields in this serializer represent data that can be viewed by anyone on the
     internet."""
@@ -150,4 +107,12 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "role",
+        ]
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        exclude = [
+            "password",
         ]

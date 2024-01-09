@@ -1,85 +1,105 @@
+from account.permissions import IsAdminUser, IsAuthor, IsOwner, ReadOnly
+from django.utils import timezone
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Post
-from .serializers import PostSerializer
+from .models import Category, Post, Tag
+from .serializers import (
+    CategorySerializer,
+    PostCreateSerializer,
+    PostDetailSerializer,
+    TagSerializer,
+)
 
 
 class PostListView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (ReadOnly | (IsAuthenticated & IsAuthor),)
 
     def get(self, request, *args, **kwargs):
         """Get all posts."""
         posts = Post.objects.all()
-        serializer = PostSerializer(posts, many=True)
+        serializer = PostDetailSerializer(posts, many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         """Create a new post.
 
-        Note: The user must be logged in and be an author.
+        The user must be logged in (authenticated) and be an author.
         """
-        # TODO: Check that the user is logged in.
-        # TODO: Check that the user has the author role.
-        serializer = PostSerializer(data=request.data)
+        serializer = PostCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_permissions(self):
-        """Ignore permissions on GET requests. We want anyone to be able to access all posts."""
-        if self.request.method == "GET":
-            return []
-        return super().get_permissions()
-
 
 class PostDetailView(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (ReadOnly | (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner))),)
 
     def get(self, request, pk, *args, **kwargs):
         """Get a post."""
         post = get_object_or_404(Post, pk=pk)
-        serializer = PostSerializer(post)
+        serializer = PostDetailSerializer(post)
         return Response(serializer.data)
 
     def put(self, request, pk, *args, **kwargs):
         """Update a post.
 
-        Note: The user must be logged in and must be an admin or the author of the post.
+        The user must be logged in (authenticated) and must be an admin or the author of the post.
         """
-        # TODO: Check that the user is logged in.
-        # TODO: Check that the user is an admin or the author of the post.
         post = get_object_or_404(Post, pk=pk)
-        serializer = PostSerializer(post, data=request.data, partial=True)
+        serializer = PostCreateSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class PublishPostView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner)),)
+
+    def post(self, request, pk, *args, **kwargs):
+        """Publish an existing post."""
+        post = get_object_or_404(Post, pk=pk)
+        if not post.published:
+            post.published = True
+            post.publish_date = timezone.now()
+            post.save()
+
+            serializer = PostDetailSerializer(post)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"error": "The post is already published."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class DeletePostView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (ReadOnly | (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner))),)
+
     def delete(self, request, pk, *args, **kwargs):
         """Delete a post.
 
-        Note: The user must be logged in and must be an admin or the author of the post.
+        The user must be logged in (authenticated) and must be an admin or the author of the post.
         """
-        # TODO: Check that the user is logged in.
-        # TODO: Check that the user is an admin or the author of the post.
-        if request.user.is_authenticated:
-            # TODO: Check that the user is an admin or the author of the post.
-            post = get_object_or_404(Post, pk=pk)
-            post.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response({"error": "Unauthorized access."}, status=status.HTTP_401_UNAUTHORIZED)
+        post = get_object_or_404(Post, pk=pk)
+        post.delete()
+        return Response({"detail": "Post deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
-    def get_permissions(self):
-        """Ignore permissions on GET requests. We want anyone to be able to access a post."""
-        if self.request.method == "GET":
-            return []
-        return super().get_permissions()
+
+class CategoryListView(ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class TagListView(ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
