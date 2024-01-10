@@ -140,7 +140,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "account.UserProfile"
 
-# Whitelist server addresses to prevent errors due to CORS rules, for frontend.
+# Configure CORS to permit access from specific frontend server addresses.
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",

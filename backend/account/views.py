@@ -4,11 +4,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import UserProfile
 from .permissions import IsAdminUser
 from .serializers import (
     AccountSerializer,
+    CustomTokenObtainPairSerializer,
     UserProfilePrivateSerializer,
     UserProfilePublicSerializer,
     UserRegisterSerializer,
@@ -27,6 +29,10 @@ class RegisterView(APIView):
             )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    _serializer_class = CustomTokenObtainPairSerializer
 
 
 class UserProfileView(APIView):

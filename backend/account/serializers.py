@@ -2,6 +2,7 @@ from account.models import UserProfile
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -78,6 +79,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token["username"] = user.username
+        return token
 
 
 class UserProfilePublicSerializer(serializers.ModelSerializer):
