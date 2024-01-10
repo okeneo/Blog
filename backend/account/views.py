@@ -32,7 +32,7 @@ class RegisterView(APIView):
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
-    _serializer_class = CustomTokenObtainPairSerializer
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class UserProfileView(APIView):
