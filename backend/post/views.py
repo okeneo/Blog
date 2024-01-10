@@ -10,8 +10,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Category, Post, Tag
 from .serializers import (
     CategorySerializer,
-    PostCreateSerializer,
     PostDetailSerializer,
+    PostWriteSerializer,
     TagSerializer,
 )
 
@@ -31,7 +31,7 @@ class PostListView(APIView):
 
         The user must be logged in (authenticated) and be an author.
         """
-        serializer = PostCreateSerializer(data=request.data)
+        serializer = PostWriteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -54,7 +54,7 @@ class PostDetailView(APIView):
         The user must be logged in (authenticated) and must be an admin or the author of the post.
         """
         post = get_object_or_404(Post, pk=pk)
-        serializer = PostCreateSerializer(post, data=request.data, partial=True)
+        serializer = PostWriteSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

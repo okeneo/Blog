@@ -17,6 +17,10 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
+    """Serializer for retrieving detailed information about a post. Includes nested
+    serializers for tags, category, and author.
+    """
+
     tags = TagSerializer(many=True)
     category = CategorySerializer()
     author = UserProfilePublicSerializer()
@@ -26,7 +30,9 @@ class PostDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PostCreateSerializer(serializers.ModelSerializer):
+class PostWriteSerializer(serializers.ModelSerializer):
+    """Serializer for creating and updating posts."""
+
     class Meta:
         model = Post
         exclude = [
