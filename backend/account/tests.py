@@ -5,12 +5,12 @@ from django.test import Client, TestCase
 
 User = get_user_model()
 
-# TODO: Create users via database API (not register endpoint) except when testing RegisterUserTest.
+# Writing tests:
+# Create objects via database API (not endpoints) except when not directly testing that endpoint.
 # Break tests into more functions - They are too long as it stands.
 # Isolate tests - A test should not depend on a previous test
-# Write a create method for creating users when needed
-# Ensure that all tests would otherwise work.
-# More: https://chat.openai.com/c/b9fb938d-6d10-4ea5-b0c7-5a5073e46660
+# Write a create method for creating objects when needed
+# Ensure that all tests would otherwise pass, in the case of testing failures.
 
 
 class RegisterUserTest(TestCase):
@@ -319,7 +319,7 @@ class RegisterUserTest(TestCase):
 
 class LoginUserTest(TestCase):
     def setUp(self):
-        self.url = "/blog/login/"
+        self.url = "/blog/token/"
         self.client = Client()
 
         # Create a new user.
@@ -327,58 +327,107 @@ class LoginUserTest(TestCase):
             username="new_user", email="new_user@gmail.com", password="@123tza.."
         )
 
+    def test_login_with_username(self):
+        data = {
+            "username": "new_user",
+            "password": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
 
-#     def test_username_login(self):
-#         # Test logging in a user with their username.
-#         self.register_token = Token.objects.filter(user=self.user).first().key
-#         data = {
-#             "username": "new_user",
-#             "password": "@123tza..",
-#         }
-#         json_data = json.dumps(data)
-#         response = self.client.post(self.url, data=json_data, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertIn("refresh", response_data)
+        self.assertIn("access", response_data)
+        self.assertIsNotNone(response_data["refresh"])
+        self.assertIsNotNone(response_data["access"])
 
-#         self.assertEqual(response.status_code, 200)
-#         response_data = json.loads(response.content)
-#         self.assertIn("token", response_data)
-#         self.assertIsNotNone(response_data["token"])
-#         login_token = response_data["token"]
-#         self.assertEqual(self.register_token, login_token)
+    def test_login_with_email(self):
+        data = {
+            "username": "new_user@gmail.com",
+            "password": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
 
-#     def test_email_login(self):
-#         # Test logging in a user with their email.
-#         self.register_token = Token.objects.filter(user=self.user).first().key
-#         data = {
-#             "email": "new_user@gmail.com",
-#             "password": "@123tza..",
-#         }
-#         json_data = json.dumps(data)
-#         response = self.client.post(self.url, data=json_data, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertIn("refresh", response_data)
+        self.assertIn("access", response_data)
+        self.assertIsNotNone(response_data["refresh"])
+        self.assertIsNotNone(response_data["access"])
 
-#         self.assertEqual(response.status_code, 200)
-#         response_data = json.loads(response.content)
-#         self.assertIn("token", response_data)
-#         self.assertIsNotNone(response_data["token"])
-#         login_token = response_data["token"]
-#         self.assertEqual(self.register_token, login_token)
+    def test_login_with_email_field(self):
+        data = {
+            "email": "new_user@gmail.com",
+            "password": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
 
-#     # def test_login_users(self):
-#     #     # Test logging in without password.
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("username", response_data)
+        self.assertIn("This field is required.", response_data["username"])
 
-#     #     # Test logging with wrong password.
+    def test_login_without_password(self):
+        data = {
+            "username": "new_user",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
 
-#     #     # Test logging in without username.
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("password", response_data)
+        self.assertIn("This field is required.", response_data["password"])
 
-#     #     # Test logging in with a user that does not not exist.
+    def test_login_with_wrong_password(self):
+        data = {
+            "username": "new_user",
+            "password": "wrong_password",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
 
-#     #     # Test logging in without email.
+        self.assertEqual(response.status_code, 401)
+        response_data = json.loads(response.content)
+        self.assertIn("detail", response_data)
+        self.assertEqual(
+            "No active account found with the given credentials", response_data["detail"]
+        )
 
-#     #     # Test logging in with email that does not exist.
+    def test_login_without_username(self):
+        data = {
+            "password": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("username", response_data)
+        self.assertIn("This field is required.", response_data["username"])
+
+    def test_login_non_existing_username(self):
+        data = {
+            "username": "does_not_exist",
+            "password": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 401)
+        response_data = json.loads(response.content)
+        self.assertIn("detail", response_data)
+        self.assertEqual(
+            "No active account found with the given credentials", response_data["detail"]
+        )
 
 
 # class LogoutUserTest(TestCase):
 #     def setUp(self):
-#         self.url = "/blog/logout/"
+#         self.url = "/blog/blacklist/"
 #         self.client = Client()
 
 
