@@ -18,11 +18,11 @@ class RegisterUserTest(TestCase):
         self.url = "/blog/register/"
         self.client = Client()
 
-    def test_new_user_register(self):
+    def test_register_new_user(self):
         # Test creating a new user.
         data = {
             "username": "new_user",
-            "email": "newuser@gmail.com",
+            "email": "new_user@gmail.com",
             "password1": "@123tza..",
             "password2": "@123tza..",
         }
@@ -31,41 +31,28 @@ class RegisterUserTest(TestCase):
 
         self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.content)
-        self.assertIn("token", response_data)
-        self.assertIsNotNone(response_data["token"])
+        self.assertIn("detail", response_data)
+        self.assertEqual(response_data["detail"], "User registered successfully.")
 
         # Test that the user instance was created in the database.
-        user = User.objects.filter(username="new_user", email="newuser@gmail.com").first()
+        user = User.objects.filter(username="new_user", email="new_user@gmail.com").first()
         self.assertIsNotNone(user)
         self.assertEqual("new_user", user.username)
-        self.assertEqual("newuser@gmail.com", user.email)
+        self.assertEqual("new_user@gmail.com", user.email)
 
-    def test_duplicate_username_or_email_register(self):
+    def test_register_user_with_existing_username(self):
         # Create a new user.
         data = {
             "username": "new_user",
-            "email": "newuser@gmail.com",
-            "password1": "@123tza..",
-            "password2": "@123tza..",
+            "email": "new_user@gmail.com",
+            "password": "@123tza..",
         }
-        json_data = json.dumps(data)
-        response = self.client.post(self.url, data=json_data, content_type="application/json")
+        User.objects.create_user(**data)
 
-        self.assertEqual(response.status_code, 201)
-        response_data = json.loads(response.content)
-        self.assertIn("token", response_data)
-        self.assertIsNotNone(response_data["token"])
-
-        # Test that the user instance was created in the database.
-        user = User.objects.filter(username="new_user", email="newuser@gmail.com").first()
-        self.assertIsNotNone(user)
-        self.assertEqual("new_user", user.username)
-        self.assertEqual("newuser@gmail.com", user.email)
-
-        # Test creating a user with the same username.
+        # Test creating a user with an existing username.
         data = {
             "username": "new_user",
-            "email": "anotheruser@gmail.com",
+            "email": "another_user@gmail.com",
             "password1": "@123tza..",
             "password2": "@123tza..",
         }
@@ -77,10 +64,19 @@ class RegisterUserTest(TestCase):
         self.assertIn("username", response_data)
         self.assertIn("The username 'new_user' is already registered.", response_data["username"])
 
-        # Test creating a user with the same email.
+    def test_register_user_with_existing_email(self):
+        # Create a new user.
+        data = {
+            "username": "new_user",
+            "email": "new_user@gmail.com",
+            "password": "@123tza..",
+        }
+        User.objects.create_user(**data)
+
+        # Test creating a user with an existing email.
         data = {
             "username": "another_user",
-            "email": "newuser@gmail.com",
+            "email": "new_user@gmail.com",
             "password1": "@123tza..",
             "password2": "@123tza..",
         }
@@ -91,13 +87,22 @@ class RegisterUserTest(TestCase):
         response_data = json.loads(response.content)
         self.assertIn("email", response_data)
         self.assertIn(
-            "The email address 'newuser@gmail.com' is already registered.", response_data["email"]
+            "The email address 'new_user@gmail.com' is already registered.", response_data["email"]
         )
 
-        # Test creating a user with the same username and email.
+    def test_register_user_with_existing_username_and_email(self):
+        # Create a new user.
         data = {
             "username": "new_user",
-            "email": "newuser@gmail.com",
+            "email": "new_user@gmail.com",
+            "password": "@123tza..",
+        }
+        User.objects.create_user(**data)
+
+        # Test creating a user with an existing username and email.
+        data = {
+            "username": "new_user",
+            "email": "new_user@gmail.com",
             "password1": "@123tza..",
             "password2": "@123tza..",
         }
@@ -110,33 +115,13 @@ class RegisterUserTest(TestCase):
         self.assertIn("The username 'new_user' is already registered.", response_data["username"])
         self.assertIn("email", response_data)
         self.assertIn(
-            "The email address 'newuser@gmail.com' is already registered.", response_data["email"]
+            "The email address 'new_user@gmail.com' is already registered.", response_data["email"]
         )
 
-        # TODO: Test creating a new user with a super long email. Does the max_length in the
-        # serializer email field provide a different max_length than in the model definition?
-        # - Testing possible inconsistencies.
-
-    def test_invalid_register_data(self):
-        # Test creating a new user with invalid username.
-        data = {
-            "username": "",
-            "email": "newuser@gmail.com",
-            "password1": "@123tza..",
-            "password2": "@123tza..",
-        }
-        json_data = json.dumps(data)
-        response = self.client.post(self.url, data=json_data, content_type="application/json")
-
-        self.assertEqual(response.status_code, 400)
-        response_data = json.loads(response.content)
-        self.assertIn("username", response_data)
-        self.assertIn("This field may not be blank.", response_data["username"])
-
-        # Test creating a new user with another invalid username.
+    def test_register_user_with_invalid_username(self):
         data = {
             "username": "badcharacter!",
-            "email": "newuser@gmail.com",
+            "email": "new_user@gmail.com",
             "password1": "@123tza..",
             "password2": "@123tza..",
         }
@@ -152,10 +137,10 @@ class RegisterUserTest(TestCase):
             response_data["username"],
         )
 
-        # Test creating a new user with an invalid email.
+    def test_register_user_with_invalid_email(self):
         data = {
             "username": "validusername",
-            "email": "newuser",
+            "email": "new_user",
             "password1": "@123tza..",
             "password2": "@123tza..",
         }
@@ -170,10 +155,10 @@ class RegisterUserTest(TestCase):
             response_data["email"],
         )
 
-        # Test creating a new user with an invalid password.
+    def test_register_user_with_invalid_passwords(self):
         data = {
             "username": "new_user",
-            "email": "newuser@gmail.com",
+            "email": "new_user@gmail.com",
             "password1": "1",
             "password2": "1",
         }
@@ -196,10 +181,10 @@ class RegisterUserTest(TestCase):
             response_data["password1"],
         )
 
-        # Test creating a new user when password1 and password2 are not equal.
+    def test_register_user_with_non_matching_passwords(self):
         data = {
             "username": "new_user",
-            "email": "newuser@gmail.com",
+            "email": "new_user@gmail.com",
             "password1": "@123tza..",
             "password2": "@123tza...",
         }
@@ -214,20 +199,134 @@ class RegisterUserTest(TestCase):
             response_data["non_field_errors"],
         )
 
-    def test_missing_register_data(self):
-        # Missing username, email and passwords.
-        pass
+    def test_register_user_with_blank_username(self):
+        data = {
+            "username": "",
+            "email": "new_user@gmail.com",
+            "password1": "@123tza..",
+            "password2": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("username", response_data)
+        self.assertIn("This field may not be blank.", response_data["username"])
+
+    def test_register_user_with_blank_email(self):
+        data = {
+            "username": "new_user",
+            "email": "",
+            "password1": "@123tza..",
+            "password2": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("email", response_data)
+        self.assertIn("This field may not be blank.", response_data["email"])
+
+    def test_register_user_with_missing_username(self):
+        data = {
+            "email": "new_user@gmail.com",
+            "password1": "@123tza..",
+            "password2": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("username", response_data)
+        self.assertIn("This field is required.", response_data["username"])
+
+    def test_register_user_with_missing_email(self):
+        data = {
+            "username": "new_user",
+            "password1": "@123tza..",
+            "password2": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("email", response_data)
+        self.assertIn("This field is required.", response_data["email"])
+
+    def test_register_user_with_missing_password1(self):
+        data = {
+            "username": "new_user",
+            "email": "new_user@gmail.com",
+            "password2": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("password1", response_data)
+        self.assertIn("This field is required.", response_data["password1"])
+
+    def test_register_user_with_missing_password2(self):
+        data = {
+            "username": "new_user",
+            "email": "new_user@gmail.com",
+            "password1": "@123tza..",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("password2", response_data)
+        self.assertIn("This field is required.", response_data["password2"])
+
+    def test_register_user_with_missing_passwords(self):
+        data = {
+            "username": "new_user",
+            "email": "new_user@gmail.com",
+        }
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("password1", response_data)
+        self.assertIn("password2", response_data)
+        self.assertIn("This field is required.", response_data["password1"])
+        self.assertIn("This field is required.", response_data["password2"])
+
+    def test_register_user_with_no_data(self):
+        data = {}
+        json_data = json.dumps(data)
+        response = self.client.post(self.url, data=json_data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.content)
+        self.assertIn("username", response_data)
+        self.assertIn("email", response_data)
+        self.assertIn("password1", response_data)
+        self.assertIn("password2", response_data)
+        self.assertIn("This field is required.", response_data["username"])
+        self.assertIn("This field is required.", response_data["email"])
+        self.assertIn("This field is required.", response_data["password1"])
+        self.assertIn("This field is required.", response_data["password2"])
 
 
-# class LoginUserTest(TestCase):
-#     def setUp(self):
-#         self.url = "/blog/login/"
-#         self.client = Client()
+class LoginUserTest(TestCase):
+    def setUp(self):
+        self.url = "/blog/login/"
+        self.client = Client()
 
-#         # Create a new user.
-#         self.user = User.objects.create_user(
-#             username="new_user", email="newuser@gmail.com", password="@123tza.."
-#         )
+        # Create a new user.
+        self.user = User.objects.create_user(
+            username="new_user", email="new_user@gmail.com", password="@123tza.."
+        )
+
 
 #     def test_username_login(self):
 #         # Test logging in a user with their username.
@@ -250,7 +349,7 @@ class RegisterUserTest(TestCase):
 #         # Test logging in a user with their email.
 #         self.register_token = Token.objects.filter(user=self.user).first().key
 #         data = {
-#             "email": "newuser@gmail.com",
+#             "email": "new_user@gmail.com",
 #             "password": "@123tza..",
 #         }
 #         json_data = json.dumps(data)
@@ -277,15 +376,15 @@ class RegisterUserTest(TestCase):
 #     #     # Test logging in with email that does not exist.
 
 
-class LogoutUserTest(TestCase):
-    def setUp(self):
-        self.url = "/blog/logout/"
-        self.client = Client()
+# class LogoutUserTest(TestCase):
+#     def setUp(self):
+#         self.url = "/blog/logout/"
+#         self.client = Client()
 
 
-class UserProfileTest(TestCase):
-    def setUp(self):
-        self.url = "/blog/"
-        self.client = Client()
+# class UserProfileTest(TestCase):
+#     def setUp(self):
+#         self.url = "/blog/"
+#         self.client = Client()
 
-    # Test retrieving a user profile with different token and username combinations.
+# Test retrieving a user profile with different token and username combinations.
