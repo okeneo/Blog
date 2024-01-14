@@ -113,7 +113,7 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
     bio = serializers.CharField(allow_blank=False)
     first_name = serializers.CharField(allow_blank=False)
     last_name = serializers.CharField(allow_blank=False)
-    role = serializers.CharField(allow_blank=False)
+    role = serializers.CharField(allow_blank=False, read_only=True)
 
     class Meta:
         model = UserProfile
@@ -202,22 +202,25 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
     def validate_old_password(self, old_password):
         # does this password belong to the user?
+        # pass request context data in?
         pass
 
-    def validate_new_password1(self, password1):
+    def validate_new_password1(self, new_password1):
         try:
             # Validate the password using Django's built-in password validator.
-            validate_password(password1)
+            validate_password(new_password1)
         except ValueError as e:
             raise serializers.ValidationError(str(e))
-        return password1
+        return new_password1
 
     def validate(self, data):
+        old_password = data.get("old_password")
         new_password1 = data.get("new_password1")
         new_password2 = data.get("new_password2")
 
         # Extra validation.
-        self.validate_password1(new_password1)
+        self.validate_old_password(old_password)
+        self.validate_new_password1(new_password1)
 
         if new_password1 != new_password2:
             raise serializers.ValidationError("Passwords do not match.")

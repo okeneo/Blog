@@ -33,6 +33,8 @@ class RegisterView(APIView):
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    """A custom view for user authentication using JWT."""
+
     serializer_class = CustomTokenObtainPairSerializer
 
 
