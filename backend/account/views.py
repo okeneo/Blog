@@ -75,14 +75,27 @@ class UserProfileView(APIView):
 
 class AccountView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated & IsAdminUser,)
+    permission_classes = (IsAuthenticated & (IsOwner | IsAdminUser),)
 
     def get(self, request, username, *args, **kwargs):
         """Get the data of a given user."""
         user = get_object_or_404(UserProfile, username=username)
 
+        # Only admins should be able to view the amount of the data provided in the
+        # AccountSerializer.
+        if user.role != UserProfile.ADMIN:
+            return Response(
+                {"detail": "You do not have the permission to access this resource."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = AccountSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, username, *args, **kwargs):
+        """Delete a user."""
+        user = get_object_or_404(UserProfile, username=username)
+        user.delete()
+        return Response({"detail": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
 class PasswordChangeView(APIView):

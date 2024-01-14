@@ -55,15 +55,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return password1
 
     def validate(self, data):
-        email = data.get("email")
-        username = data.get("username")
         password1 = data.get("password1")
         password2 = data.get("password2")
-
-        # Extra validation.
-        self.validate_email(email)
-        self.validate_username(username)
-        self.validate_password1(password1)
 
         if password1 != password2:
             raise serializers.ValidationError("Passwords do not match.")
@@ -157,21 +150,6 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
             )
         return role
 
-    def validate(self, data):
-        username = data.get("username")
-        email = data.get("email")
-        role = data.get("role")
-
-        # Extra validation.
-        if username:
-            self.validate_username(username)
-        if email:
-            self.validate_email(email)
-        if role:
-            self.validate_role(role)
-
-        return data
-
 
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -214,13 +192,8 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         return new_password1
 
     def validate(self, data):
-        old_password = data.get("old_password")
         new_password1 = data.get("new_password1")
         new_password2 = data.get("new_password2")
-
-        # Extra validation.
-        self.validate_old_password(old_password)
-        self.validate_new_password1(new_password1)
 
         if new_password1 != new_password2:
             raise serializers.ValidationError("Passwords do not match.")
