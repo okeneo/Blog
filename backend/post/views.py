@@ -24,7 +24,7 @@ class PostListView(APIView):
         """Get all posts."""
         posts = Post.objects.all()
         serializer = PostDetailSerializer(posts, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Create a new post.
@@ -46,7 +46,7 @@ class PostDetailView(APIView):
         """Get a post."""
         post = get_object_or_404(Post, pk=pk)
         serializer = PostDetailSerializer(post)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk, *args, **kwargs):
         """Update a post.
@@ -57,7 +57,7 @@ class PostDetailView(APIView):
         serializer = PostWriteSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, *args, **kwargs):

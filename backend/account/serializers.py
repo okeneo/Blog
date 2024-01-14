@@ -48,7 +48,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def validate_password1(self, password1):
         try:
-            # Validate the password using the Django's built-in password validator.
+            # Validate the password using Django's built-in password validator.
             validate_password(password1)
         except ValueError as e:
             raise serializers.ValidationError(str(e))
@@ -60,7 +60,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         password1 = data.get("password1")
         password2 = data.get("password2")
 
-        # Extra validation for email and username.
+        # Extra validation.
         self.validate_email(email)
         self.validate_username(username)
         self.validate_password1(password1)
@@ -82,6 +82,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """A custom serializer that adds 'username' to the payload of a JWT token."""
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -105,18 +107,70 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
     """The fields in this serializer represent data that only the user of the associated
     account, or users with the admin role should have access to."""
 
-    # TODO: Should we use this serializer for user account updates?
+    username = serializers.CharField(max_length=150, allow_blank=False)
+    # The email is validated by the EmailField email validator.
+    email = serializers.EmailField(max_length=255, allow_blank=False)
+    bio = serializers.CharField(allow_blank=False)
+    first_name = serializers.CharField(allow_blank=False)
+    last_name = serializers.CharField(allow_blank=False)
+    role = serializers.CharField(allow_blank=False)
 
     class Meta:
         model = UserProfile
         fields = [
             "username",
-            "bio",
             "email",
+            "bio",
             "first_name",
             "last_name",
             "role",
         ]
+
+    def validate_email(self, email):
+        email = email.lower()
+        try:
+            UserProfile.objects.get(email=email)
+            raise serializers.ValidationError(f"The email address '{email}' is already registered.")
+        except UserProfile.DoesNotExist:
+            return email
+
+    def validate_username(self, username):
+        try:
+            UserProfile.objects.get(username=username)
+            raise serializers.ValidationError(f"The username '{username}' is already registered.")
+        except UserProfile.DoesNotExist:
+            username_validator = UnicodeUsernameValidator()
+            try:
+                # Validate the username using the default User model username validator.
+                username_validator(username)
+            except ValueError as e:
+                raise serializers.ValidationError(str(e))
+            return username
+
+    def validate_role(self, role):
+        role = role.upper()
+        role_list = [UserProfile.ADMIN, UserProfile.AUTHOR, UserProfile.READER]
+
+        if role not in role_list:
+            raise serializers.ValidationError(
+                f"The role must be one of the following: {role_list}."
+            )
+        return role
+
+    def validate(self, data):
+        username = data.get("username")
+        email = data.get("email")
+        role = data.get("role")
+
+        # Extra validation.
+        if username:
+            self.validate_username(username)
+        if email:
+            self.validate_email(email)
+        if role:
+            self.validate_role(role)
+
+        return data
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -125,3 +179,47 @@ class AccountSerializer(serializers.ModelSerializer):
         exclude = [
             "password",
         ]
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
+    new_password1 = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
+    new_password2 = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "old_password",
+            "new_password1",
+            "new_password2",
+        ]
+
+    def validate_old_password(self, old_password):
+        # does this password belong to the user?
+        pass
+
+    def validate_new_password1(self, password1):
+        try:
+            # Validate the password using Django's built-in password validator.
+            validate_password(password1)
+        except ValueError as e:
+            raise serializers.ValidationError(str(e))
+        return password1
+
+    def validate(self, data):
+        new_password1 = data.get("new_password1")
+        new_password2 = data.get("new_password2")
+
+        # Extra validation.
+        self.validate_password1(new_password1)
+
+        if new_password1 != new_password2:
+            raise serializers.ValidationError("Passwords do not match.")
+
+        return data
