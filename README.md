@@ -74,7 +74,7 @@ Visit [https://okeneo.github.io/okeneo](https://okeneo.github.io/okeneo) to see 
 
 5. Extra Setup:
 
-    ```bash
+    ```
     Set DEBUG=True in settings.py if necessary
     ```
 
