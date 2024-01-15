@@ -49,7 +49,7 @@ class Post(models.Model):
     publish_date = models.DateTimeField(blank=True, null=True)
     published = models.BooleanField(default=False)
 
-    author = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
+    author = models.ForeignKey(UserProfile, on_delete=models.PROTECT, related_name="post")
     tags = models.ManyToManyField(Tag, blank=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
 
@@ -58,6 +58,27 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    parent_comment = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="replies"
+    )
+    text = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    # This field indicates whether the user has tried to delete the comment. Comments that
+    # have children comments will not be truly deleted to preserve the tree structure.
+    supposedly_deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-date_created"]
+
+    def __str__(self):
+        return self.text
 
 
 @receiver(pre_save, sender=Post)

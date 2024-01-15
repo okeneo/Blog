@@ -4,13 +4,14 @@
 [![GitHub issues](https://img.shields.io/github/issues/okeneo/okeneo-repo.svg)](https://github.com/okeneo/okeneo-repo/issues)
 [![GitHub stars](https://img.shields.io/github/stars/okeneo/okeneo-repo.svg)](https://github.com/okeneo/okeneo-repo/stargazers)
 
-Welcome to the repository of my personal website. This site serves as a portfolio and a place to showcase my projects, skills, and experiences. It includes a blog section.
+This website serves as a portfolio and a place to showcase my projects, skills, and experiences. It also includes a blog section.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Demo](#demo)
 - [Technologies Used](#technologies-used)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Contact](#contact)
 
@@ -36,6 +37,10 @@ Visit [https://okeneo.github.io/okeneo](https://okeneo.github.io/okeneo) to see 
 - Django REST framework
 - JSON Web Token (JWT)
 - PostgreSQL
+
+## Requirements
+- Python 3.11
+- Django 5.0
 
 ## Installation
 
