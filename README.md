@@ -62,13 +62,13 @@ Visit [https://okeneo.github.io/okeneo](https://okeneo.github.io/okeneo) to see 
 3. Install Dependencies:
 
     ```bash
+    cd backend
     python -m pip install -r requirements.txt
     ```
 
 4. Apply Migrations
 
     ```bash
-    cd backend
     python manage.py migrate
     ```
 
