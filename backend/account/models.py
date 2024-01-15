@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from post.models import Comment, Post
+from post.models import Comment, Post, Reaction
 
 
 class UserProfile(AbstractUser):
@@ -26,14 +26,15 @@ class UserProfile(AbstractUser):
 
 @receiver(pre_delete, sender=UserProfile)
 def change_blog_post_and_comment_author(sender, instance=None, created=False, **kwargs):
-    """Whenever a user gets deleted, check if they are the author of any posts.
-    If they are, change the author of each post to a new user before deleting
-    the user. Also, change the author of each comment to a new user before deleting
-    the user."""
+    """Before a user is deleted, check if they are associated with any posts, comments or reactions.
+    If they are, update the user under these objects to a new user before deleting them."""
     deleted_user = UserProfile.objects.get(username="deleted_user")
 
-    if instance.post.exists():
+    if instance.posts.exists():
         Post.objects.filter(author=instance).update(author=deleted_user)
 
-    if instance.post.exists():
+    if instance.comments.exists():
         Comment.objects.filter(user=instance).update(user=deleted_user)
+
+    if instance.reaction.exists():
+        Reaction.objects.filter(user=instance).update(user=deleted_user)
