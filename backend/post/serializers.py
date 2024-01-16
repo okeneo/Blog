@@ -21,9 +21,9 @@ class PostDetailSerializer(serializers.ModelSerializer):
     serializers for tags, category, and author.
     """
 
-    tags = TagSerializer(many=True)
-    category = CategorySerializer()
     author = UserProfilePublicSerializer()
+    category = CategorySerializer()
+    tags = TagSerializer(many=True)
 
     class Meta:
         model = Post
