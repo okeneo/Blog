@@ -3,7 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 
-from .models import Category, Post, Tag
+from .models import Category, Tag
 
 User = get_user_model()
 
@@ -66,6 +66,7 @@ class CreatePost(TestCase):
 
         # self.assertEqual(response.status_code, 401)
         response_data = json.loads(response.content)
+        response_data
         # print(response_data)
 
     def test_get_all_posts(self):

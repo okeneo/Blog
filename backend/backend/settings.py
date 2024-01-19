@@ -188,9 +188,20 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+
+# Variables for the VerificationToken model.
+VERIFICATION_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
+VERIFICATION_TOKEN_MAX_ATTEMPTS = 3
+
+MAX_TIME_TO_CONFIRM_EMAIL = 3 * 24 * 60 * 60  # 3 days.
+MAX_TIME_TO_CONFIRM_PASSWORD_RESET = 0
+MAX_TIME_TO_CONFIRM_EMAIL_CHANGE = 0
+
+DEFAULT_FROM_EMAIL = "okenetega@gmail.com"

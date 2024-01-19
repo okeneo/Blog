@@ -4,6 +4,8 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from .models import VerificationToken
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     # The email is validated by the EmailField email validator.
@@ -70,8 +72,41 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
         user = UserProfile.objects.create(email=email, username=username)
         user.set_password(password)
+
+        # A user must verify their email before they are set to active.
+        user.is_active = False
         user.save()
+
         return user
+
+
+class VerificationTokenSerializer(serializers.ModelSerializer):
+    token_key = serializers.UUIDField(required=True)
+
+    class Meta:
+        model = VerificationToken
+        fields = [
+            "token_key",
+        ]
+
+    def validate(self, data):
+        token_key = data.get("token_key")
+
+        try:
+            token = VerificationToken.objects.get(key=token_key)
+        except VerificationToken.DoesNotExist:
+            raise serializers.ValidationError("Invalid verification token.")
+
+        if token.is_expired:
+            raise serializers.ValidationError("Token expired.")
+
+        # The user identifier passed, must be the same as the one associated with the token.
+        # This is to prevent the case of an attacker getting access to a token that belongs
+        # to another user. For example
+        # if token.user.identifier != user_identifier:
+        #     raise serializers.ValidationError("Unauthorized access.")
+
+        return data
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

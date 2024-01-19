@@ -15,6 +15,7 @@ class UserProfileAdmin(UserAdmin):
             },
         ),
     )
+
     list_display = (
         "username",
         "email",
@@ -22,4 +23,17 @@ class UserProfileAdmin(UserAdmin):
         "last_login",
         "pk",
     )
+
+    fieldsets = UserAdmin.fieldsets + (
+        (
+            "Additional Information",
+            {
+                "fields": (
+                    "role",
+                    "bio",
+                ),
+            },
+        ),
+    )
+
     model = UserProfile
