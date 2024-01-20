@@ -31,6 +31,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         email = email.lower()
         try:
             UserProfile.objects.get(email=email)
+            # TODO: Check if the user has been unverified for more than 3 days? so that we can make the
+            # 3 days more precise? keeping in mind the error time for a cron job. We could get to
+            # delete such a user 3.05 days after for example, which is okay, but to maintain our
+            # contract with this user we check so that we can allow their credentials to work as we
+            # said it would after 3 days.
             raise serializers.ValidationError(f"The email address '{email}' is already registered.")
         except UserProfile.DoesNotExist:
             return email
@@ -38,6 +43,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate_username(self, username):
         try:
             UserProfile.objects.get(username=username)
+            # TODO: Check if the user has been unverified for more than 3 days? so that we can make the
+            # 3 days more precise? keeping in mind the error time for a cron job. We could get to
+            # delete such a user 3.05 days after for example, which is okay, but to maintain our
+            # contract with this user we check so that we can allow their credentials to work as we
+            # said it would after 3 days.
             raise serializers.ValidationError(f"The username '{username}' is already registered.")
         except UserProfile.DoesNotExist:
             username_validator = UnicodeUsernameValidator()
