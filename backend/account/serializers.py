@@ -100,12 +100,6 @@ class VerificationTokenSerializer(serializers.ModelSerializer):
         if token.is_expired:
             raise serializers.ValidationError("Token expired.")
 
-        # The user identifier passed, must be the same as the one associated with the token.
-        # This is to prevent the case of an attacker getting access to a token that belongs
-        # to another user. For example
-        # if token.user.identifier != user_identifier:
-        #     raise serializers.ValidationError("Unauthorized access.")
-
         return data
 
 

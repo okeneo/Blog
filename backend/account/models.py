@@ -23,8 +23,6 @@ class UserProfile(AbstractUser):
     bio = models.CharField(max_length=255, blank=True)
     email = models.EmailField(max_length=255, unique=True, verbose_name="email address")
 
-    # This is a token that will be used to identify a user primarily during email verification.
-    # identifier = models.UUIDField(default=uuid4, editable=False)
     is_email_verified = models.BooleanField(default=False)
 
     def __str__(self):
