@@ -3,7 +3,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/okeneo/PersonalNest/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/okeneo/PersonalNest.svg)](https://github.com/okeneo/PersonalNest/issues)
 
-This website serves as a portfolio and a place to showcase my projects, skills, and experiences. It also includes a blog section.
+This website serves as a portfolio and place to showcase my projects, skills, and experiences. It also includes a blog section.
 
 ## Table of Contents
 

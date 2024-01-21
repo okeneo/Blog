@@ -1,7 +1,10 @@
 import json
 
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.test import Client, TestCase
+
+from .models import VerificationToken
 
 User = get_user_model()
 
@@ -32,13 +35,16 @@ class RegisterUserTest(TestCase):
         self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.content)
         self.assertIn("detail", response_data)
-        self.assertEqual(response_data["detail"], "User registered successfully.")
+        self.assertEqual(
+            response_data["detail"], "User created successfully. Email verification email sent."
+        )
 
         # Test that the user instance was created in the database.
         user = User.objects.filter(username="new_user", email="new_user@gmail.com").first()
         self.assertIsNotNone(user)
         self.assertEqual("new_user", user.username)
         self.assertEqual("new_user@gmail.com", user.email)
+        self.assertFalse(user.is_active)
 
     def test_register_user_with_existing_username(self):
         # Create a new user.
@@ -425,6 +431,10 @@ class LoginUserTest(TestCase):
         )
 
 
+# class EmailVerificationTest(TestCase):
+#     pass
+
+
 # class LogoutUserTest(TestCase):
 #     def setUp(self):
 #         self.url = "/blog/blacklist/"
@@ -437,3 +447,37 @@ class LoginUserTest(TestCase):
 #         self.client = Client()
 
 # Test retrieving a user profile with different token and username combinations.
+# e.g., Can a user use another user's token?
+
+
+class VerificationTokenTest(TestCase):
+    def test_duplicate_UUID(self):
+        """This tests that in the astronomically unlikely chance that a key is created with a
+        UUID that already exists in the database, our overriding save method will generate a new
+        UUID as the key."""
+        # Create users.
+        user_1 = User.objects.create_user(
+            username="new_user_1", email="new_user_1@gmail.com", password="@123tza.."
+        )
+
+        user_2 = User.objects.create_user(
+            username="new_user_2", email="new_user_2@gmail.com", password="@123tza.."
+        )
+
+        token_1 = VerificationToken(user=user_1)
+        token_1.save()
+        token_1_key = token_1.key
+
+        token_2 = VerificationToken(user=user_2, key=token_1_key)
+        token_2.save()
+        token_2_key = token_2.key
+        self.assertNotEqual(token_1_key, token_2_key)
+
+    def test_at_most_one_token_per_user(self):
+        # Create a new user.
+        user = User.objects.create_user(
+            username="new_user", email="new_user@gmail.com", password="@123tza.."
+        )
+        VerificationToken.objects.create(user=user)
+        with self.assertRaises(IntegrityError):
+            VerificationToken.objects.create(user=user)

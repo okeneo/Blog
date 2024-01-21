@@ -12,15 +12,20 @@ EMAIL_TEMPLATES = {
         "subject": "Verify your email address",
         "message": verification_url,
     },
-    "password_reset": {
+    "forgot_password": {
         "subject": "Reset Password",
+        "message": verification_url
+        + "\nIf you didn't change it, you should.....?",
+    },
+    "email_update": {
+        "subject": "Email Update Verification",
         "message": verification_url
         + "\nIf you didn't change it, you should click this link to recover it.",
     },
 }
 
 
-def send_verification_email(name, email, token_key, token=None):
+def send_verification_email(name, email, token_key):
     template = EMAIL_TEMPLATES.get(name)
 
     if template:
@@ -35,11 +40,6 @@ def send_verification_email(name, email, token_key, token=None):
         )
     else:
         raise ValueError(f"Unsupported email template: {name}.")
-
-    # Update the number of times we have attemped to send the user a verification email.
-    if token:
-        token.send_attempts += 1
-        token.save(update_fields=["send_attempts"])
 
 
 def perform_resend_verification(email):

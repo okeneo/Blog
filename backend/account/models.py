@@ -9,7 +9,7 @@ from django.utils import timezone
 
 
 class UserProfile(AbstractUser):
-    """Custom user in the system. This user can be an author, admin or reader."""
+    """A custom user in the system. This user can be an author, admin or reader."""
 
     AUTHOR = "AUTHOR"
     ADMIN = "ADMIN"
@@ -50,8 +50,9 @@ class VerificationToken(models.Model):
         return str(self.key)
 
     def save(self, *args, **kwargs):
-        # Check if the generated UUID is not unique (however astronomically unlikely that is),
-        # and generate a new one if needed. Exclude the current instance from this lookup.
+        # Check if the generated UUID is not unique (however astronomically unlikely that is)
+        # in the database and generate a new unique UUID. Exclude the current instance from
+        # this lookup.
         while VerificationToken.objects.filter(key=self.key).exclude(id=self.id).exists():
             self.key = uuid4()
             self.created_at = timezone.now()
@@ -69,11 +70,17 @@ class VerificationToken(models.Model):
     def has_exceeded_maximum_attempts(self):
         return self.send_attempts >= settings.VERIFICATION_TOKEN_MAX_ATTEMPTS
 
+    def increment_send_attempts(self):
+        """Increment the number of times we have tried to send the user a verification email."""
+        self.send_attempts += 1
+        self.save(update_fields=["send_attempts"])
+
 
 @receiver(pre_delete, sender=UserProfile)
 def change_blog_post_and_comment_author(sender, instance=None, created=False, **kwargs):
     """Before a user is deleted, check if they are associated with any posts, comments or reactions.
-    If they are, update the user under these objects to a new user before deleting them."""
+    If they are, update the user under these objects to a new user before deleting them. This is to
+    prevent a cascading deletion of these objects or protection of the user."""
     from post.models import Comment, Post, Reaction
 
     deleted_user = UserProfile.objects.get(username="deleted_user")

@@ -198,7 +198,7 @@ class AccountSerializer(serializers.ModelSerializer):
         ]
 
 
-class ChangePasswordSerializer(serializers.ModelSerializer):
+class PasswordChangeSerializer(serializers.ModelSerializer):
     old_password = serializers.CharField(
         style={"input_type": "password"}, required=True, write_only=True
     )
@@ -218,9 +218,10 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         ]
 
     def validate_old_password(self, old_password):
-        # does this password belong to the user?
-        # pass request context data in?
-        pass
+        user = self.context.get("user")
+        if not user.check_password(old_password):
+            raise serializers.ValidationError("Wrong password.")
+        return old_password
 
     def validate_new_password1(self, new_password1):
         try:
