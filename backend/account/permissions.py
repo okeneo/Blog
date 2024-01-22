@@ -1,4 +1,4 @@
-from account.models import UserProfile
+from .models import UserProfile
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 

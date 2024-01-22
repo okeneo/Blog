@@ -99,9 +99,7 @@ class VerificationTokenSerializer(serializers.ModelSerializer):
             "token_key",
         ]
 
-    def validate(self, data):
-        token_key = data.get("token_key")
-
+    def validate_token_key(self, token_key):
         try:
             token = VerificationToken.objects.get(key=token_key)
         except VerificationToken.DoesNotExist:
@@ -110,7 +108,7 @@ class VerificationTokenSerializer(serializers.ModelSerializer):
         if token.is_expired:
             raise serializers.ValidationError("Token expired.")
 
-        return data
+        return token_key
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -140,8 +138,7 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
     account, or users with the admin role should have access to."""
 
     username = serializers.CharField(max_length=150, allow_blank=False)
-    # The email is validated by the EmailField email validator.
-    email = serializers.EmailField(max_length=255, allow_blank=False)
+    email = serializers.EmailField(max_length=255, allow_blank=False, read_only=True)
     bio = serializers.CharField(allow_blank=False)
     first_name = serializers.CharField(allow_blank=False)
     last_name = serializers.CharField(allow_blank=False)
@@ -190,6 +187,27 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
         return role
 
 
+class UpdateEmailSerializer(serializers.ModelSerializer):
+    new_email = serializers.EmailField(
+        max_length=255, allow_blank=False, write_only=True, required=True
+    )
+
+    def validate_new_email(self, new_email):
+        new_email = new_email.lower()
+        try:
+            user = UserProfile.objects.get(email=new_email)
+            if user.email == new_email:
+                return serializers.ValidationError(
+                    "The new email address must be different from the old email address."
+                )
+            else:
+                raise serializers.ValidationError(
+                    f"The email address '{new_email}' is already registered."
+                )
+        except UserProfile.DoesNotExist:
+            return new_email
+
+
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
@@ -232,8 +250,14 @@ class PasswordChangeSerializer(serializers.ModelSerializer):
         return new_password1
 
     def validate(self, data):
+        old_password = data.get("old_password")
         new_password1 = data.get("new_password1")
         new_password2 = data.get("new_password2")
+
+        if old_password == new_password1:
+            return serializers.ValidationError(
+                "The new password must be different from the old password."
+            )
 
         if new_password1 != new_password2:
             raise serializers.ValidationError("Passwords do not match.")

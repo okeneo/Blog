@@ -1,25 +1,26 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.urls import reverse
 
 from .models import VerificationToken
 
 User = get_user_model()
 
-verification_url = "http://localhost:8000/blog/verify-email/?token_key={token_key}"
+# verification_url = reverse("email_confimation")
 EMAIL_TEMPLATES = {
     "registration": {
         "subject": "Verify your email address",
-        "message": verification_url,
+        "message": "http://localhost:8000/blog/verify-email/?token_key={token_key}",
     },
     "forgot_password": {
         "subject": "Reset Password",
-        "message": verification_url
+        "message": "http://localhost:8000/blog/verify-email/?token_key={token_key}"
         + "\nIf you didn't change it, you should.....?",
     },
-    "email_update": {
+    "update_email": {
         "subject": "Email Update Verification",
-        "message": verification_url
+        "message": ""
         + "\nIf you didn't change it, you should click this link to recover it.",
     },
 }

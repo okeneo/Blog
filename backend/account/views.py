@@ -13,8 +13,9 @@ from .models import UserProfile, VerificationToken
 from .permissions import IsAdminUser, IsOwner, ReadOnly
 from .serializers import (
     AccountSerializer,
-    PasswordChangeSerializer,
     CustomTokenObtainPairSerializer,
+    PasswordChangeSerializer,
+    UpdateEmailSerializer,
     UserProfilePrivateSerializer,
     UserProfilePublicSerializer,
     UserRegisterSerializer,
@@ -25,7 +26,7 @@ from .utils import perform_resend_verification, send_verification_email
 
 class RegisterView(APIView):
     def post(self, request, *args, **kwargs):
-        """Create a new user."""
+        """Create a new user and send them a verification email."""
         serializer = UserRegisterSerializer(data=request.data)
         with transaction.atomic():
             if serializer.is_valid():
@@ -50,30 +51,6 @@ class RegisterView(APIView):
                 )
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class EmailConfirmationView(APIView):
-    def get(self, request, *args, **kwargs):
-        data = {
-            "token_key": self.request.query_params.get("token_key"),
-        }
-        serializer = VerificationTokenSerializer(data=data)
-        if serializer.is_valid():
-            # Set is_active and is_email_verified to True to indicate successful user registration.
-            token_key = serializer.validated_data.get("token_key")
-            token = VerificationToken.objects.get(key=token_key)
-            user = token.user
-            user.is_active = True
-            user.is_email_verified = True
-            user.save()
-
-            # Delete the verification token once the user has been registered successfully.
-            token.delete()
-
-            return Response(
-                {"detail": "User registration complete."}, status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ResendVerificationEmailView(APIView):
@@ -113,6 +90,82 @@ class ResendVerificationEmailView(APIView):
             )
 
 
+class VerifyEmailView(APIView):
+    def post(self, request, *args, **kwargs):
+        """Check the validity of the verification token to complete a new user's registration."""
+        # Don't use query parameters? Make the token a URL path?
+        data = {
+            "token_key": self.request.query_params.get("token_key"),
+        }
+        serializer = VerificationTokenSerializer(data=data)
+        if serializer.is_valid():
+            # Set is_active and is_email_verified to True to indicate successful user registration.
+            token_key = serializer.validated_data.get("token_key")
+            token = VerificationToken.objects.get(key=token_key)
+            user = token.user
+            user.is_active = True
+            user.is_email_verified = True
+            user.save()
+
+            # Delete the verification token once the user has been registered successfully.
+            token.delete()
+
+            return Response(
+                {"detail": "User registration complete."}, status=status.HTTP_204_NO_CONTENT
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateEmailView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated & IsOwner,)
+
+    def post(self, request, *args, **kwargs):
+        new_email = request.data.get("new_email")
+        user = request.user
+
+        serializer = UpdateEmailSerializer(data=new_email)
+        if serializer.is_valid():
+            # Send verification email.
+            new_email = serializer.validated_data.get("new_email")
+            token = VerificationToken.objects.create(user=user)
+            try:
+                send_verification_email("update_email", new_email, token.key)
+            except BadHeaderError:
+                # Manually rollback database changes since we are catching the exception.
+                transaction.set_rollback(True)
+                return Response(
+                    {"error": "Bad email header in the provided email."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResendVerificationEmailUpdateView(APIView):
+    pass
+
+
+class VerifyEmailUpdateView(APIView):
+    pass
+
+
+class ForgotPasswordView(APIView):
+    def post(self, request, email, *args, **kwargs):
+        user = get_object_or_404(UserProfile, email=email)
+        # If the user reaches this view, we should set them as inactive until they create
+        # a choose a new password.
+        user.is_active = False
+
+
+class ResendVerificationForgotPasswordView(APIView):
+    pass
+
+
+class ResetPasswordView(APIView):
+    pass
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """A custom view for user authentication using JWT."""
 
@@ -144,8 +197,11 @@ class UserProfileView(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, username, *args, **kwargs):
-        """Update the information of a user."""
+    def put(self, request, username, *args, **kwargs):
+        """Update the information of a user.
+
+        The email address and role cannot be updated with this view.
+        """
         user = get_object_or_404(UserProfile, username=username)
         serializer = UserProfilePrivateSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -188,38 +244,15 @@ class PasswordChangeView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated & IsOwner,)
 
-    def put(self, request, username, *args, **kwargs):
-        user = get_object_or_404(UserProfile, username=username)
+    def post(self, request, *args, **kwargs):
+        user = request.user
         serializer = PasswordChangeSerializer(data=request.data, context={"user": user})
         if serializer.is_valid():
             user.set_password(serializer.validated_data.get("new_password1"))
             user.save()
+            # Logout user from all devices after password change i.e., blacklist all their tokens.
             return Response(
                 {"detail", "Password changed successfully."},
                 status=status.HTTP_204_NO_CONTENT,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class EmailChangeView(APIView):
-    authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated & IsOwner,)
-
-    def post(self, request, *args, **kwargs):
-        data = {
-            "token": self.request.query_params.get("token"),
-        }
-        serializer = VerificationTokenSerializer(data=data)
-        if serializer.is_valid():
-            print()
-
-
-class ForgotPasswordView(APIView):
-    def post(self, request, email, *args, **kwargs):
-        user = get_object_or_404(UserProfile, email=email)
-        # If the user reaches this view, we should set them as inactive until they create
-        # a choose a new password.
-        user.is_active = False
-
-        # If the user was not the one that clicked forgot password, then they should click a link,
-        # that will go to my email box so that I can inspect the issue.

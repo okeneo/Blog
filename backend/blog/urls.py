@@ -1,27 +1,47 @@
 from account.views import (
     CustomTokenObtainPairView,
-    EmailConfirmationView,
+    ForgotPasswordView,
+    PasswordChangeView,
     RegisterView,
+    ResendVerificationEmailUpdateView,
     ResendVerificationEmailView,
+    ResendVerificationForgotPasswordView,
+    ResetPasswordView,
+    UpdateEmailView,
     UserProfileView,
+    VerifyEmailUpdateView,
+    VerifyEmailView,
 )
 from django.urls import include, path
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
-    path("verify-email/", EmailConfirmationView.as_view(), name="email_confimation"),
+    path("update-email/", UpdateEmailView.as_view(), name="update_email"),
+    path("forgot-password", ForgotPasswordView.as_view(), name="forgot_password"),
     path(
         "resend-verification-email/",
         ResendVerificationEmailView.as_view(),
-        name="resend-verification-email",
+        name="resend_verification_email",
     ),
+    path(
+        "resend-verification-email-update",
+        ResendVerificationEmailUpdateView.as_view(),
+        name="resend_verification_email_update",
+    ),
+    path(
+        "resend-verification-forgot-password",
+        ResendVerificationForgotPasswordView.as_view(),
+        name="resend_verification_forgot_password",
+    ),
+    path("verify-email/", VerifyEmailView.as_view(), name="verify_email"),
+    path("verify-email_update/", VerifyEmailUpdateView.as_view(), name="verify_email_update"),
+    path("reset_password/", ResetPasswordView.as_view(), name="reset_password"),
     path("token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path(
-        "token/blacklist/", TokenBlacklistView.as_view(), name="token_blacklist"
-    ),  # Do we need this?
-    path("user/<str:username>/", UserProfileView.as_view(), name="user-profile"),
+    path("token/blacklist/", TokenBlacklistView.as_view(), name="token_blacklist"),
+    path("password-change/", PasswordChangeView.as_view(), name="password_change"),
+    path("user/<str:username>/", UserProfileView.as_view(), name="user_profile"),
     path("account/", include("account.urls")),
     path("post/", include("post.urls")),
 ]
