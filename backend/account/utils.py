@@ -13,14 +13,14 @@ EMAIL_TEMPLATES = {
         "subject": "Verify your email address",
         "message": "http://localhost:8000/blog/verify-email/?token_key={token_key}",
     },
-    "forgot_password": {
-        "subject": "Reset Password",
-        "message": "http://localhost:8000/blog/verify-email/?token_key={token_key}"
-        + "\nIf you didn't change it, you should.....?",
-    },
     "update_email": {
         "subject": "Email Update Verification",
-        "message": ""
+        "message": "http://localhost:8000/blog/verify-email_update/?token_key={token_key}"
+        + "\nIf you didn't change it, you should click this link to recover it.",
+    },
+    "forgot_password": {
+        "subject": "Reset Password",
+        "message": "http://localhost:8000/blog/reset-password/?token_key={token_key}"
         + "\nIf you didn't change it, you should click this link to recover it.",
     },
 }
@@ -32,6 +32,7 @@ def send_verification_email(name, email, token_key):
     if template:
         subject = template["subject"]
         message = template["message"].format(token_key=token_key)
+        # Send emails asynchronously?
         send_mail(
             subject=subject,
             message=message,

@@ -196,12 +196,17 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
-# Variables for the VerificationToken model.
-VERIFICATION_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
-VERIFICATION_TOKEN_MAX_ATTEMPTS = 3
+# Variables for verifying a new user's email.
+VERIFICATION_EMAIL_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
+VERIFICATION_EMAIL_TOKEN_MAX_ATTEMPTS = 3
 
+# Variables for verifying a new user's updated email.
+VERIFICATION_EMAIL_UPDATE_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
+
+# Variables for verifying a new user's updated email.
+VERIFICATION_RESET_PASSWORD_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
+
+# Determines the period in which a user can verify their account.
 MAX_TIME_TO_CONFIRM_EMAIL = 3 * 24 * 60 * 60  # 3 days.
-MAX_TIME_TO_CONFIRM_PASSWORD_RESET = 0
-MAX_TIME_TO_CONFIRM_EMAIL_CHANGE = 0
 
 DEFAULT_FROM_EMAIL = "okenetega@gmail.com"

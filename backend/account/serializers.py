@@ -4,7 +4,12 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import VerificationToken
+from .models import (
+    VerificationEmailToken,
+    VerificationEmailUpdateToken,
+    VerificationResetPasswordToken,
+    VerificationToken,
+)
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -109,6 +114,21 @@ class VerificationTokenSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Token expired.")
 
         return token_key
+
+
+class VerificationEmailTokenSerializer(VerificationTokenSerializer):
+    class Meta(VerificationTokenSerializer.Meta):
+        model = VerificationEmailToken
+
+
+class VerificationEmailUpdateTokenSerializer(VerificationTokenSerializer):
+    class Meta(VerificationTokenSerializer.Meta):
+        model = VerificationEmailUpdateToken
+
+
+class VerificationResetPasswordTokenSerializer(VerificationTokenSerializer):
+    class Meta(VerificationTokenSerializer.Meta):
+        model = VerificationResetPasswordToken
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

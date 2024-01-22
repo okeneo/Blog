@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import UserProfile, VerificationToken
+from .models import UserProfile, VerificationEmailToken, VerificationEmailUpdateToken
 from .permissions import IsAdminUser, IsOwner, ReadOnly
 from .serializers import (
     AccountSerializer,
@@ -19,21 +19,27 @@ from .serializers import (
     UserProfilePrivateSerializer,
     UserProfilePublicSerializer,
     UserRegisterSerializer,
-    VerificationTokenSerializer,
+    VerificationEmailTokenSerializer,
+    VerificationEmailUpdateTokenSerializer,
+    VerificationResetPasswordTokenSerializer,
 )
 from .utils import perform_resend_verification, send_verification_email
 
 
 class RegisterView(APIView):
     def post(self, request, *args, **kwargs):
-        """Create a new user and send them a verification email."""
+        """Create a new user and send them a verification email.
+
+        is_active and is_email_verified are initially set to false to indicate incomplete
+        registration.
+        """
         serializer = UserRegisterSerializer(data=request.data)
         with transaction.atomic():
             if serializer.is_valid():
                 user = serializer.save()
 
                 # Send verification email.
-                token = VerificationToken.objects.create(user=user)
+                token = VerificationEmailToken.objects.create(user=user)
                 try:
                     send_verification_email("registration", user.email, token.key)
                 except BadHeaderError:
@@ -55,9 +61,12 @@ class RegisterView(APIView):
 
 class ResendVerificationEmailView(APIView):
     def post(self, request, *args, **kwargs):
+        """Resend a user another email to verify the email address on their newly created
+        account."""
         email = request.data.get("email")
         if not email:
             return Response({"error": "Email required."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             token, user = perform_resend_verification(email)
         except ValidationError as e:
@@ -68,7 +77,7 @@ class ResendVerificationEmailView(APIView):
             # attempts, so we create a new token for another attempt.
             curr_send_attempts = token.send_attempts
             token.delete()
-            token = VerificationToken.objects.create(user=user)
+            token = VerificationEmailToken.objects.create(user=user)
             token.send_attempts = curr_send_attempts
             token.save(update_fields=["send_attempts"])
 
@@ -97,11 +106,11 @@ class VerifyEmailView(APIView):
         data = {
             "token_key": self.request.query_params.get("token_key"),
         }
-        serializer = VerificationTokenSerializer(data=data)
+        serializer = VerificationEmailTokenSerializer(data=data)
         if serializer.is_valid():
             # Set is_active and is_email_verified to True to indicate successful user registration.
             token_key = serializer.validated_data.get("token_key")
-            token = VerificationToken.objects.get(key=token_key)
+            token = VerificationEmailToken.objects.get(key=token_key)
             user = token.user
             user.is_active = True
             user.is_email_verified = True
@@ -113,7 +122,8 @@ class VerifyEmailView(APIView):
             return Response(
                 {"detail": "User registration complete."}, status=status.HTTP_204_NO_CONTENT
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateEmailView(APIView):
@@ -121,14 +131,23 @@ class UpdateEmailView(APIView):
     permission_classes = (IsAuthenticated & IsOwner,)
 
     def post(self, request, *args, **kwargs):
+        """Update a user's email address by sending a verification link to their new email."""
+        # This view needs rate limiting to prevent excessive token creation.
         new_email = request.data.get("new_email")
         user = request.user
 
         serializer = UpdateEmailSerializer(data=new_email)
         if serializer.is_valid():
-            # Send verification email.
             new_email = serializer.validated_data.get("new_email")
-            token = VerificationToken.objects.create(user=user)
+
+            # If a token already exists under this user, create a new one to ensure we are always
+            #  using a new UUID for the token key.
+            token, created = VerificationEmailUpdateToken.objects.get_or_create(user=user)
+            if not created:
+                token.delete()
+                token = VerificationEmailUpdateToken.objects.create(user=user)
+
+            # Send verification email.
             try:
                 send_verification_email("update_email", new_email, token.key)
             except BadHeaderError:
@@ -142,12 +161,27 @@ class UpdateEmailView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ResendVerificationEmailUpdateView(APIView):
-    pass
-
-
 class VerifyEmailUpdateView(APIView):
-    pass
+    def post(self, request, *args, **kwargs):
+        """Check the validity of the verification token to update a user's email address."""
+        data = {
+            "token_key": self.request.query_params.get("token_key"),
+        }
+        serializer = VerificationEmailUpdateTokenSerializer(data=data)
+        if serializer.is_valid():
+            token_key = serializer.validated_data.get("token_key")
+            token = VerificationEmailUpdateToken.objects.get(key=token_key)
+            user = token.new_email
+            user.save()
+
+            # Delete the verification token once the user has changed their email successfully.
+            token.delete()
+
+            return Response(
+                {"detail": "User registration complete."}, status=status.HTTP_204_NO_CONTENT
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ForgotPasswordView(APIView):
@@ -156,10 +190,6 @@ class ForgotPasswordView(APIView):
         # If the user reaches this view, we should set them as inactive until they create
         # a choose a new password.
         user.is_active = False
-
-
-class ResendVerificationForgotPasswordView(APIView):
-    pass
 
 
 class ResetPasswordView(APIView):
