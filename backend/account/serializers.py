@@ -4,13 +4,6 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import (
-    VerificationEmailToken,
-    VerificationEmailUpdateToken,
-    VerificationResetPasswordToken,
-    VerificationToken,
-)
-
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     # The email is validated by the EmailField email validator.
@@ -95,42 +88,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class VerificationTokenSerializer(serializers.ModelSerializer):
-    token_key = serializers.UUIDField(required=True)
-
-    class Meta:
-        model = VerificationToken
-        fields = [
-            "token_key",
-        ]
-
-    def validate_token_key(self, token_key):
-        try:
-            token = VerificationToken.objects.get(key=token_key)
-        except VerificationToken.DoesNotExist:
-            raise serializers.ValidationError("Invalid verification token.")
-
-        if token.is_expired:
-            raise serializers.ValidationError("Token expired.")
-
-        return token_key
-
-
-class VerificationEmailTokenSerializer(VerificationTokenSerializer):
-    class Meta(VerificationTokenSerializer.Meta):
-        model = VerificationEmailToken
-
-
-class VerificationEmailUpdateTokenSerializer(VerificationTokenSerializer):
-    class Meta(VerificationTokenSerializer.Meta):
-        model = VerificationEmailUpdateToken
-
-
-class VerificationResetPasswordTokenSerializer(VerificationTokenSerializer):
-    class Meta(VerificationTokenSerializer.Meta):
-        model = VerificationResetPasswordToken
-
-
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """A custom serializer that adds 'username' to the payload of a JWT token."""
 
@@ -205,27 +162,6 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
                 f"The role must be one of the following: {role_list}."
             )
         return role
-
-
-class UpdateEmailSerializer(serializers.ModelSerializer):
-    new_email = serializers.EmailField(
-        max_length=255, allow_blank=False, write_only=True, required=True
-    )
-
-    def validate_new_email(self, new_email):
-        new_email = new_email.lower()
-        try:
-            user = UserProfile.objects.get(email=new_email)
-            if user.email == new_email:
-                return serializers.ValidationError(
-                    "The new email address must be different from the old email address."
-                )
-            else:
-                raise serializers.ValidationError(
-                    f"The email address '{new_email}' is already registered."
-                )
-        except UserProfile.DoesNotExist:
-            return new_email
 
 
 class AccountSerializer(serializers.ModelSerializer):
