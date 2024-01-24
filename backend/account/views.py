@@ -46,7 +46,7 @@ class RegisterView(APIView):
                 token.increment_send_attempts()
 
                 return Response(
-                    {"detail": "User created successfully. Email verification email sent."},
+                    {"detail": "User created successfully. Email verification sent."},
                     status=status.HTTP_201_CREATED,
                 )
             else:
@@ -77,7 +77,7 @@ class ResendVerificationEmailView(APIView):
             token.increment_send_attempts()
 
             return Response(
-                {"detail": "Email verification email resent."},
+                {"detail": "Email verification resent."},
                 status=status.HTTP_204_NO_CONTENT,
             )
 
@@ -131,7 +131,7 @@ class UpdateEmailView(APIView):
         send_verification_email("update_email", new_email, token.key)
 
         return Response(
-            {"detail": "Email verification email sent."},
+            {"detail": "Email verification sent."},
             status=status.HTTP_204_NO_CONTENT,
         )
 
