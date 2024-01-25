@@ -219,3 +219,36 @@ class PasswordChangeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords do not match.")
 
         return data
+
+
+class PasswordResetSerializer(serializers.ModelSerializer):
+    new_password1 = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
+    new_password2 = serializers.CharField(
+        style={"input_type": "password"}, required=True, write_only=True
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "new_password1",
+            "new_password2",
+        ]
+
+    def validate_new_password1(self, new_password1):
+        try:
+            # Validate the password using Django's built-in password validator.
+            validate_password(new_password1)
+        except ValueError as e:
+            raise serializers.ValidationError(str(e))
+        return new_password1
+
+    def validate(self, data):
+        new_password1 = data.get("new_password1")
+        new_password2 = data.get("new_password2")
+
+        if new_password1 != new_password2:
+            raise serializers.ValidationError("Passwords do not match.")
+
+        return data

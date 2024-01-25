@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
@@ -22,9 +21,9 @@ EMAIL_TEMPLATES = {
         "message": "http://localhost:8000/blog/verify-email_update/?token_key={token_key}"
         + "\nIf you didn't change it, you should click this link to recover it.",
     },
-    "forgot_password": {
+    "reset_password": {
         "subject": "Reset Password",
-        "message": "http://localhost:8000/blog/reset-password/?token_key={token_key}"
+        "message": "http://localhost:8000/blog/verify-reset-password/?token_key={token_key}"
         + "\nIf you didn't change it, you should click this link to recover it.",
     },
 }

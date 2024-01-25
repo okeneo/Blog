@@ -1,7 +1,6 @@
 from uuid import uuid4
 
 from django.conf import settings
-from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -30,39 +29,41 @@ class UserProfile(AbstractUser):
         return self.username
 
 
-class VerificationToken(models.Model):
-    """A super class for verifying a user.
+class BaseVerificationToken(models.Model):
+    """An abstract superclass for verifying a user.
 
     Each token is deleted once verification completes successfully.
 
-    By default, these tokens will never expire.
-
-    Additionally, a user will have at most one of these tokens associated with their account at
-    any given time."""
+    Additionally, a user will have at most one of each subclassed token associated with their
+    account at any given time."""
 
     key = models.UUIDField(default=uuid4, unique=True)
-    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+    def is_expired(self, expiry_life):
+        expiration_time = self.created_at + timezone.timedelta(seconds=expiry_life)
+        return timezone.now() > expiration_time
+
+    def save_unique_token(self, model_class):
+        # Check if the generated UUID is not unique (however astronomically unlikely that is)
+        # in the database and generate a new unique UUID. Exclude the current instance from
+        # this lookup. This is important because each token should point to a unique user.
+        while model_class.objects.filter(key=self.key).exclude(id=self.id).exists():
+            self.key = uuid4()
+            self.created_at = timezone.now()
+
+    def save(self, *args, **kwargs):
+        self.save_unique_token(self.__class__)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.key)
 
-    def save(self, *args, **kwargs):
-        # Check if the generated UUID is not unique (however astronomically unlikely that is)
-        # in the database and generate a new unique UUID. Exclude the current instance from
-        # this lookup.
-        while VerificationToken.objects.filter(key=self.key).exclude(id=self.id).exists():
-            self.key = uuid4()
-            self.created_at = timezone.now()
 
-        super().save(*args, **kwargs)
-
-    @property
-    def is_expired(self):
-        return False
-
-
-class VerificationEmailToken(VerificationToken):
+class VerificationEmailToken(BaseVerificationToken):
     """This is used for verifying the email address of a new user.
 
     If a user makes a request to resend a new verification link, the current token is deleted and
@@ -71,14 +72,12 @@ class VerificationEmailToken(VerificationToken):
     If the user fails to verify their email within MAX_TIME_TO_CONFIRM_EMAIL amount of time, the
     token is deleted (along with the unverified user)."""
 
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     send_attempts = models.IntegerField(default=0)
 
     @property
     def is_expired(self):
-        expiration_time = self.created_at + timezone.timedelta(
-            seconds=settings.VERIFICATION_EMAIL_TOKEN_EXPIRY_LIFE
-        )
-        return timezone.now() > expiration_time
+        return super().is_expired(settings.VERIFICATION_EMAIL_TOKEN_EXPIRY_LIFE)
 
     @property
     def has_exceeded_maximum_attempts(self):
@@ -90,37 +89,25 @@ class VerificationEmailToken(VerificationToken):
         self.save(update_fields=["send_attempts"])
 
 
-class VerificationEmailUpdateToken(VerificationToken):
-    """This is used for verifiying a user's new email address."""
+class VerificationEmailUpdateToken(BaseVerificationToken):
+    """This is used for verifiying a user's updated email address."""
 
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
     new_email = models.EmailField(max_length=255, unique=True, verbose_name="new email address")
 
     @property
     def is_expired(self):
-        expiration_time = self.created_at + timezone.timedelta(
-            seconds=settings.VERIFICATION_EMAIL_UPDATE_TOKEN_EXPIRY_LIFE
-        )
-        return timezone.now() > expiration_time
+        return super().is_expired(settings.VERIFICATION_EMAIL_UPDATE_TOKEN_EXPIRY_LIFE)
 
 
-class VerificationResetPasswordToken(VerificationToken):
-    """This is used to verify that a user should be allowed to reset the password on a given
-    account."""
+class VerificationResetPasswordToken(BaseVerificationToken):
+    """This is used to allow a user to reset their password."""
 
-    new_password = models.CharField(max_length=128, verbose_name="password")
-
-    def set_password(self, raw_password):
-        self.new_password = make_password(raw_password)
-
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.new_password)
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
 
     @property
     def is_expired(self):
-        expiration_time = self.created_at + timezone.timedelta(
-            seconds=settings.VERIFICATION_RESET_PASSWORD_TOKEN_EXPIRY_LIFE
-        )
-        return timezone.now() > expiration_time
+        return super().is_expired(settings.VERIFICATION_RESET_PASSWORD_TOKEN_EXPIRY_LIFE)
 
 
 @receiver(pre_delete, sender=UserProfile)

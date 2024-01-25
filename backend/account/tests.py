@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.test import Client, TestCase
 
-from .models import VerificationToken
+from .models import VerificationEmailToken
 
 User = get_user_model()
 
@@ -36,7 +36,7 @@ class RegisterUserTest(TestCase):
         response_data = json.loads(response.content)
         self.assertIn("detail", response_data)
         self.assertEqual(
-            response_data["detail"], "User created successfully. Email verification email sent."
+            response_data["detail"], "User created successfully. Email verification sent."
         )
 
         # Test that the user instance was created in the database.
@@ -450,7 +450,7 @@ class LoginUserTest(TestCase):
 # e.g., Can a user use another user's token?
 
 
-class VerificationTokenTest(TestCase):
+class VerificationEmailTokenTest(TestCase):
     def test_duplicate_UUID(self):
         """This tests that in the astronomically unlikely chance that a key is created with a
         UUID that already exists in the database, our overriding save method will generate a new
@@ -464,11 +464,11 @@ class VerificationTokenTest(TestCase):
             username="new_user_2", email="new_user_2@gmail.com", password="@123tza.."
         )
 
-        token_1 = VerificationToken(user=user_1)
+        token_1 = VerificationEmailToken(user=user_1)
         token_1.save()
         token_1_key = token_1.key
 
-        token_2 = VerificationToken(user=user_2, key=token_1_key)
+        token_2 = VerificationEmailToken(user=user_2, key=token_1_key)
         token_2.save()
         token_2_key = token_2.key
         self.assertNotEqual(token_1_key, token_2_key)
@@ -478,6 +478,6 @@ class VerificationTokenTest(TestCase):
         user = User.objects.create_user(
             username="new_user", email="new_user@gmail.com", password="@123tza.."
         )
-        VerificationToken.objects.create(user=user)
+        VerificationEmailToken.objects.create(user=user)
         with self.assertRaises(IntegrityError):
-            VerificationToken.objects.create(user=user)
+            VerificationEmailToken.objects.create(user=user)

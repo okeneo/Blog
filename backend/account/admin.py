@@ -6,7 +6,6 @@ from .models import (
     VerificationEmailToken,
     VerificationEmailUpdateToken,
     VerificationResetPasswordToken,
-    VerificationToken,
 )
 
 
@@ -42,16 +41,6 @@ class UserProfileAdmin(UserAdmin):
                 ),
             },
         ),
-    )
-
-
-@admin.register(VerificationToken)
-class VerificationTokenAdmin(admin.ModelAdmin):
-    model = VerificationToken
-
-    list_display = (
-        "user",
-        "created_at",
     )
 
 
