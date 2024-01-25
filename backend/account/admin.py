@@ -38,6 +38,7 @@ class UserProfileAdmin(UserAdmin):
                 "fields": (
                     "role",
                     "bio",
+                    "is_email_verified",
                 ),
             },
         ),

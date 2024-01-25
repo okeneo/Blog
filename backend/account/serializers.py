@@ -6,7 +6,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    # The email is validated by the EmailField email validator.
     email = serializers.EmailField(max_length=255, required=True)
     username = serializers.CharField(max_length=150, required=True)
     password1 = serializers.CharField(

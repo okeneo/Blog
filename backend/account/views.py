@@ -24,7 +24,7 @@ from .serializers import (
     UserProfilePublicSerializer,
     UserRegisterSerializer,
 )
-from .utils import (
+from .controller import (
     send_verification_email,
     validate_email_token_key,
     validate_email_update_token_key,
@@ -96,6 +96,7 @@ class VerifyEmailView(APIView):
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Confirm user registration.
         user = token.user
         user.is_active = True
         user.is_email_verified = True
@@ -199,6 +200,7 @@ class VerifyResetPasswordView(APIView):
             if not user.is_active:
                 user.is_active = True
                 user.is_email_verified = True
+                VerificationEmailToken.objects.filter(user=user).delete()
             user.save()
 
             # Delete the verification token once the user has reset their password successfully.
