@@ -18,7 +18,7 @@ EMAIL_TEMPLATES = {
     },
     "update_email": {
         "subject": "Email Update Verification",
-        "message": "http://localhost:8000/blog/verify-email_update/?token_key={token_key}"
+        "message": "http://localhost:8000/blog/verify-email-update/?token_key={token_key}"
         + "\nIf you didn't change it, you should click this link to recover it.",
     },
     "reset_password": {

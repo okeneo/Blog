@@ -112,7 +112,7 @@ class VerifyEmailView(APIView):
 
 class EmailUpdateView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated & IsOwner,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         """Update a user's email address by sending a verification link to their new email."""
@@ -150,6 +150,13 @@ class VerifyEmailUpdateView(APIView):
             token = validate_email_update_token_key(token_key)
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Re-check that the email has not been assigned to a different user before verification.
+        if UserProfile.objects.filter(email=token.new_email).exists():
+            return Response(
+                {"error": f"The email address '{token.new_email}' is already registered."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Set new email.
         user = token.user
@@ -289,7 +296,7 @@ class AccountView(APIView):
 
 class PasswordChangeView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated & IsOwner,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         user = request.user

@@ -77,7 +77,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         username = validated_data.get("username")
         password = validated_data.get("password1")
 
-        user = UserProfile.objects.create(email=email, username=username)
+        user = UserProfile(email=email, username=username)
         user.set_password(password)
 
         # A user must verify their email before they are set to active.
