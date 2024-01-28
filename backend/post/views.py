@@ -2,12 +2,12 @@ from account.permissions import IsAdminUser, IsAuthor, IsOwner, ReadOnly
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import ListAPIView, get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Category, Post, Tag
+from .models import Category, Comment, Post, Tag
 from .serializers import (
     CategorySerializer,
     PostDetailSerializer,
@@ -31,6 +31,7 @@ class PostListView(APIView):
 
         The user must be logged in (authenticated) and be an author.
         """
+        # They must be creating a post under their account.
         serializer = PostWriteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -98,3 +99,35 @@ class CategoryListView(ListAPIView):
 class TagListView(ListAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+
+
+class CommentListView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get(self, request, *args, **kwargs):
+        pass
+
+    def post(self, request, *args, **kwargs):
+        # They must be creating a comment under their account.
+        pass
+
+
+class CommentDetailView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (ReadOnly | (IsAuthenticated & IsOwner),)
+
+    def get(self, request, pk, *args, **kwargs):
+        pass
+
+    def put(self, request, pk, *args, **kwargs):
+        pass
+
+    def delete(self, request, pk, *args, **kwargs):
+        """Delete a comment."""
+        comment = get_object_or_404(Comment, pk=pk)
+
+        if comment.filter(parent_comment__isnull=False):
+            comment.delete()
+        else:
+            comment.soft_delete()

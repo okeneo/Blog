@@ -1,6 +1,7 @@
+from account.controller import get_sentinel_user
 from account.models import UserProfile
 from django.db import models
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 
@@ -72,7 +73,8 @@ class Comment(models.Model):
 
     # This field indicates whether the user has chosen to delete the comment. Comments that
     # have children comments will not be truly deleted (if deleted by the API endpoint) to
-    # preserve the tree structure. The "text" field will instead be cleared.
+    # preserve the tree structure. The "text" field will instead be cleared and a sentinel
+    # user will be used as the new user.
     is_deleted = models.BooleanField(default=False)
 
     class Meta:
@@ -92,6 +94,12 @@ class Comment(models.Model):
             return self.reactions.get(user=user).reaction_type
         except Reaction.DoesNotExist:
             return None
+
+    def soft_delete(self):
+        self.is_deleted = True
+        self.text = ""
+        self.user = get_sentinel_user()
+        self.save()
 
 
 class Reaction(models.Model):
