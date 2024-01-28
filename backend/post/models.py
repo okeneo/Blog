@@ -1,6 +1,6 @@
 from account.models import UserProfile
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 
@@ -49,7 +49,7 @@ class Post(models.Model):
     publish_date = models.DateTimeField(blank=True, null=True)
     published = models.BooleanField(default=False)
 
-    author = models.ForeignKey(UserProfile, on_delete=models.PROTECT, related_name="posts")
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="posts")
     tags = models.ManyToManyField(Tag, blank=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
 
@@ -61,18 +61,19 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.PROTECT, related_name="comments")
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="comments")
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     parent_comment = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="replies"
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
     )
     text = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
-    # This field indicates whether the user has tried to delete the comment. Comments that
-    # have children comments will not be truly deleted to preserve the tree structure.
-    supposedly_deleted = models.BooleanField(default=False)
+    # This field indicates whether the user has chosen to delete the comment. Comments that
+    # have children comments will not be truly deleted (if deleted by the API endpoint) to
+    # preserve the tree structure. The "text" field will instead be cleared.
+    is_deleted = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-date_created"]

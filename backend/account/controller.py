@@ -100,8 +100,10 @@ def validate_resend_verification_email_operation(email):
     try:
         token = VerificationEmailToken.objects.get(user=user)
     except VerificationEmailToken.DoesNotExist:
-        # A scenario where a user with a deleted account (when is_active set to false)
-        # attempts to access this endpoint.
+        # A scenario where an inactive user tries to access this endpoint.
+        # This is equivalent to not user.is_active and not user.is_email_verified because
+        # there should always be a token for a user that is not active but are yet to
+        # verify their email.
         raise ValidationError("Unauthorized access.")
 
     if token.has_exceeded_maximum_attempts:

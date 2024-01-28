@@ -19,7 +19,7 @@ This website serves as a portfolio and place to showcase my projects, skills, an
 - [Swagger Docs](https://okeneo.github.io/okeneo) API documentation.
 - Comprehensive unit tests.
 - Blog section for sharing insights and updates.
-  - Includes signup and login with token authentication.
+  - Includes signup and login with JWT authentication.
 
 ## Demo
 

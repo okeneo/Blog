@@ -96,7 +96,7 @@ class VerifyEmailView(APIView):
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Confirm user registration.
+        # Complete user registration.
         user = token.user
         user.is_active = True
         user.is_email_verified = True
@@ -176,6 +176,10 @@ class ResetPasswordView(APIView):
         email = request.data.get("email")
         user = get_object_or_404(UserProfile, email=email)
 
+        # Prevent inactive users from accessing this endpoint.
+        if not user.is_active and user.is_email_verified:
+            return Response({"error": "Unauthroized access."}, status=status.HTTP_401_UNAUTHORIZED)
+
         token, created = VerificationResetPasswordToken.objects.get_or_create(user=user)
         if not created:
             # If a VerificationResetPasswordToken token already exists for this user, create a new
@@ -204,7 +208,7 @@ class VerifyResetPasswordView(APIView):
             user.set_password(new_password)
 
             # Allow new users to verify their email address with this endpoint.
-            if not user.is_active:
+            if not user.is_active and not user.is_email_verified:
                 user.is_active = True
                 user.is_email_verified = True
                 VerificationEmailToken.objects.filter(user=user).delete()
@@ -272,8 +276,8 @@ class AccountView(APIView):
         """Get the data of a given user."""
         user = get_object_or_404(UserProfile, username=username)
 
-        # Only users with the admin role should be able to view the data provided
-        # in the AccountSerializer.
+        # Only users with the admin role should be able to view the data provided in the
+        # AccountSerializer.
         if user.role != UserProfile.ADMIN:
             return Response(
                 {"detail": "You do not have the permission to view this resource."},
@@ -283,14 +287,9 @@ class AccountView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, username, *args, **kwargs):
-        """Delete a user.
-
-        Django officially recommends setting is_active to False on delete."""
+        """Delete a user."""
         user = get_object_or_404(UserProfile, username=username)
-        user.is_active = False
-        user.save()
-        # Call function to change selected referenced objects to `deleted_user`.
-        # Call this function inside of the signals as well for consistency.
+        user.delete()
         return Response({"detail": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -304,9 +303,19 @@ class PasswordChangeView(APIView):
         if serializer.is_valid():
             user.set_password(serializer.validated_data.get("new_password1"))
             user.save()
-            # Logout user from all devices after password change i.e., blacklist all their tokens.
             return Response(
                 {"detail", "Password changed successfully."},
                 status=status.HTTP_204_NO_CONTENT,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+# class LogoutAllDevices(APIView):
+#     authentication_classes = (JWTAuthentication,)
+#     permission_classes = (IsAuthenticated,)
+
+#     def post(self, request, username, *args, **kwargs):
+#         """Invalidates all access and refresh tokens associated with a user which will require
+#         the user to login (re-authenticate) again."""
+#         user = get_object_or_404(UserProfile, username=username)

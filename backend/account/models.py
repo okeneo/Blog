@@ -37,7 +37,7 @@ class BaseVerificationToken(models.Model):
     Additionally, a user will have at most one of each subclassed token associated with their
     account at any given time."""
 
-    key = models.UUIDField(default=uuid4, unique=True)
+    key = models.UUIDField(default=uuid4, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -108,22 +108,3 @@ class VerificationResetPasswordToken(BaseVerificationToken):
     @property
     def is_expired(self):
         return super().is_expired(settings.VERIFICATION_RESET_PASSWORD_TOKEN_EXPIRY_LIFE)
-
-
-@receiver(pre_delete, sender=UserProfile)
-def change_blog_post_and_comment_author(sender, instance=None, created=False, **kwargs):
-    """Before a user is deleted, check if they are associated with any posts, comments or reactions.
-    If they are, update the user under these objects to a new user before deleting them. This is to
-    prevent a cascading deletion of these objects or protection of the user."""
-    from post.models import Comment, Post, Reaction
-
-    deleted_user = UserProfile.objects.get(username="deleted_user")
-
-    if instance.posts.exists():
-        Post.objects.filter(author=instance).update(author=deleted_user)
-
-    if instance.comments.exists():
-        Comment.objects.filter(user=instance).update(user=deleted_user)
-
-    if instance.reactions.exists():
-        Reaction.objects.filter(user=instance).update(user=deleted_user)
