@@ -1,7 +1,7 @@
 from account.serializers import UserProfilePublicSerializer
 from rest_framework import serializers
 
-from .models import Category, Post, Tag
+from .models import Category, Comment, Post, Tag
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -41,3 +41,18 @@ class PostWriteSerializer(serializers.ModelSerializer):
             "publish_date",
             "published",
         ]
+
+
+class CommentTreeSerializer(serializers.ModelSerializer):
+    replies = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
+
+    def get_replies(self, obj):
+        # Recursively serialize replies.
+        # replies represents the immediate descendants (i.e., children) of a particular comment.
+        replies = Comment.objects.filter(post=obj.post, parent_comment=obj)
+        serializer = CommentTreeSerializer(replies, many=True)
+        return serializer.data

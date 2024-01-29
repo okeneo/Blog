@@ -10,6 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Category, Comment, Post, Tag
 from .serializers import (
     CategorySerializer,
+    CommentTreeSerializer,
     PostDetailSerializer,
     PostWriteSerializer,
     TagSerializer,
@@ -101,14 +102,17 @@ class TagListView(ListAPIView):
     serializer_class = TagSerializer
 
 
-class CommentListView(APIView):
+class PostCommentsView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get(self, request, *args, **kwargs):
-        pass
+    def get(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        top_level_comments = Comment.objects.filter(post=post, parent_comment__isnull=True)
+        serializer = CommentTreeSerializer(top_level_comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, pk, *args, **kwargs):
         # They must be creating a comment under their account.
         pass
 

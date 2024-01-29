@@ -101,6 +101,15 @@ class Comment(models.Model):
         self.user = get_sentinel_user()
         self.save()
 
+    @classmethod
+    def handle_deleted_user_comments(cls, user):
+        all_user_comments = cls.objects.filter(user=user)
+        leaf_comments = all_user_comments.filter(replies__isnull=True)
+        leaf_comments.delete()
+        parent_comments = all_user_comments.filter(replies__isnull=False)
+        # Soft delete parent comments.
+        parent_comments.update(is_deleted=True, text="", user=get_sentinel_user())
+
 
 class Reaction(models.Model):
     NEUTRAL = "NEUTRAL"
