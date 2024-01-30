@@ -38,6 +38,7 @@ from .serializers import (
 
 class RegisterView(APIView):
     @swagger_auto_schema(
+        tags=["register"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -83,6 +84,7 @@ class RegisterView(APIView):
 
 class ResendVerificationEmailView(APIView):
     @swagger_auto_schema(
+        tags=["register"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -93,12 +95,12 @@ class ResendVerificationEmailView(APIView):
             ],
         ),
         responses={
-            204: "No Content",
+            200: "Successful Response",
             400: "Bad Request",
         },
     )
     def post(self, request, *args, **kwargs):
-        """Resend a user another email to verify the email address on their newly created
+        """Resend an email for a user to verify the email address on their newly created
         account."""
         email = request.data.get("email")
 
@@ -121,19 +123,20 @@ class ResendVerificationEmailView(APIView):
 
             return Response(
                 {"detail": "Email verification resent."},
-                status=status.HTTP_204_NO_CONTENT,
+                status=status.HTTP_200_OK,
             )
 
 
 class VerifyEmailView(APIView):
     @swagger_auto_schema(
+        tags=["register"],
         manual_parameters=[
             openapi.Parameter(
                 "token_key", openapi.IN_QUERY, description="Token Key", type=openapi.TYPE_STRING
             )
         ],
         responses={
-            204: "No Content",
+            200: "Successful Response",
             400: "Bad Request",
         },
     )
@@ -155,7 +158,7 @@ class VerifyEmailView(APIView):
         token.delete()
 
         return Response(
-            {"detail": "User registration complete."}, status=status.HTTP_204_NO_CONTENT
+            {"detail": "User registration complete."}, status=status.HTTP_200_OK
         )
 
 
@@ -164,6 +167,7 @@ class EmailUpdateView(APIView):
     permission_classes = (IsAuthenticated,)
 
     @swagger_auto_schema(
+        tags=["update-email"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -174,7 +178,7 @@ class EmailUpdateView(APIView):
             ],
         ),
         responses={
-            204: "No Content",
+            200: "Successful Response",
             400: "Bad Request",
         },
     )
@@ -202,19 +206,20 @@ class EmailUpdateView(APIView):
 
         return Response(
             {"detail": "A verification email has been sent to update the email address."},
-            status=status.HTTP_204_NO_CONTENT,
+            status=status.HTTP_200_OK,
         )
 
 
 class VerifyEmailUpdateView(APIView):
     @swagger_auto_schema(
+        tags=["update-email"],
         manual_parameters=[
             openapi.Parameter(
                 "token_key", openapi.IN_QUERY, description="Token Key", type=openapi.TYPE_STRING
             )
         ],
         responses={
-            204: "No Content",
+            200: "Successful Response",
             400: "Bad Request",
         },
     )
@@ -242,12 +247,13 @@ class VerifyEmailUpdateView(APIView):
         token.delete()
 
         return Response(
-            {"detail": "Email updated successfully."}, status=status.HTTP_204_NO_CONTENT
+            {"detail": "Email updated successfully."}, status=status.HTTP_200_OK
         )
 
 
 class ResetPasswordView(APIView):
     @swagger_auto_schema(
+        tags=["password-reset"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -258,13 +264,14 @@ class ResetPasswordView(APIView):
             ],
         ),
         responses={
-            204: "No Content",
+            200: "Successful Response",
             400: "Bad Request",
+            401: "Unauthorized Request",
         },
     )
     def post(self, request, *args, **kwargs):
         """Reset the password on a user's account. This represents the 'forgot password'
-        functionality"""
+        functionality."""
         email = request.data.get("email")
         user = get_object_or_404(UserProfile, email=email)
 
@@ -281,11 +288,12 @@ class ResetPasswordView(APIView):
 
         send_verification_email("reset_password", user.email, token.key)
 
-        return Response({"detail": "Password reset email sent"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "Password reset email sent"}, status=status.HTTP_200_OK)
 
 
 class VerifyResetPasswordView(APIView):
     @swagger_auto_schema(
+        tags=["password-reset"],
         manual_parameters=[
             openapi.Parameter(
                 "token_key", openapi.IN_QUERY, description="Token Key", type=openapi.TYPE_STRING
@@ -303,7 +311,7 @@ class VerifyResetPasswordView(APIView):
             ],
         ),
         responses={
-            204: "No Content",
+            200: "Successful Response",
             400: "Bad Request",
         },
     )
@@ -332,7 +340,7 @@ class VerifyResetPasswordView(APIView):
             token.delete()
 
             return Response(
-                {"detail": "Password reset successfully."}, status=status.HTTP_204_NO_CONTENT
+                {"detail": "Password reset successfully."}, status=status.HTTP_200_OK
             )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -349,22 +357,21 @@ class UserProfileView(APIView):
     permission_classes = (ReadOnly | (IsAuthenticated & IsOwner),)
 
     @swagger_auto_schema(
-        tags=["UserProfile"],
         manual_parameters=[
             openapi.Parameter(
                 "username", openapi.IN_PATH, description="Username", type=openapi.TYPE_STRING
             ),
         ],
         responses={
-            204: "No Content",
+            200: "Successful Response",
             400: "Bad Request",
         },
     )
     def get(self, request, username, *args, **kwargs):
-        """Get a user's profile.
+        """Get a user's profile data.
 
-        The user must be logged in (authenticated) and must either be the owner of the account,
-        or have the admin role in order to view private data.
+        In order to view more data, the user must be logged in (authenticated) and must either
+        be the owner of the account, or have the admin role.
         """
         user = get_object_or_404(UserProfile, username=username)
 
@@ -381,8 +388,20 @@ class UserProfileView(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=UserProfilePrivateSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                "username", openapi.IN_PATH, description="Username", type=openapi.TYPE_STRING
+            ),
+        ],
+        responses={
+            200: "Successful Response",
+            400: "Bad Request",
+        },
+    )
     def put(self, request, username, *args, **kwargs):
-        """Update the information of a user.
+        """Update a user's profile information.
 
         The email address and role cannot be updated with this view.
         """
@@ -398,12 +417,23 @@ class AccountView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated & (IsOwner | IsAdminUser),)
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "username", openapi.IN_PATH, description="Username", type=openapi.TYPE_STRING
+            ),
+        ],
+        responses={
+            200: "Successful Response",
+            400: "Bad Request",
+            401: "Unauthorized Request",
+        },
+    )
     def get(self, request, username, *args, **kwargs):
-        """Get the data of a given user."""
+        """Get the data of a given user.
+        Only users with the admin role are able to view the data available from this endpoint."""
         user = get_object_or_404(UserProfile, username=username)
 
-        # Only users with the admin role should be able to view the data provided in the
-        # AccountSerializer.
         if user.role != UserProfile.ADMIN:
             return Response(
                 {"detail": "You do not have the permission to view this resource."},
@@ -412,18 +442,51 @@ class AccountView(APIView):
         serializer = AccountSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "username", openapi.IN_PATH, description="Username", type=openapi.TYPE_STRING
+            ),
+        ],
+        responses={
+            200: "Successful Response",
+            400: "Bad Request",
+            401: "Unauthorized Request",
+        },
+    )
     def delete(self, request, username, *args, **kwargs):
         """Delete a user."""
         user = get_object_or_404(UserProfile, username=username)
         user.delete()
-        return Response({"detail": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "User deleted successfully."}, status=status.HTTP_200_OK)
 
 
 class PasswordChangeView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "old_password": openapi.Schema(type=openapi.TYPE_STRING),
+                "new_password1": openapi.Schema(type=openapi.TYPE_STRING),
+                "new_password2": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=[
+                "old_password",
+                "new_password1",
+                "new_password2",
+            ],
+        ),
+        responses={
+            200: "Successful Response",
+            400: "Bad Request",
+            401: "Unauthorized Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
+        """Change the password on an account."""
         user = request.user
         serializer = PasswordChangeSerializer(data=request.data, context={"user": user})
         if serializer.is_valid():
@@ -431,7 +494,7 @@ class PasswordChangeView(APIView):
             user.save()
             return Response(
                 {"detail", "Password changed successfully."},
-                status=status.HTTP_204_NO_CONTENT,
+                status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -29,7 +29,6 @@ class PostListView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Create a new post.
-
         The user must be logged in (authenticated) and be an author.
         """
         # TODO: They must be creating a post under their account.
@@ -107,6 +106,7 @@ class PostCommentsView(APIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request, pk, *args, **kwargs):
+        """Get all comments under a post."""
         post = get_object_or_404(Post, pk=pk)
         top_level_comments = Comment.objects.filter(post=post, parent_comment__isnull=True)
         serializer = CommentTreeSerializer(top_level_comments, many=True)

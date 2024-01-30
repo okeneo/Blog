@@ -114,11 +114,11 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
     account, or users with the admin role should have access to."""
 
     username = serializers.CharField(max_length=150, allow_blank=False)
-    email = serializers.EmailField(max_length=255, allow_blank=False, read_only=True)
-    bio = serializers.CharField(allow_blank=False)
-    first_name = serializers.CharField(allow_blank=False)
-    last_name = serializers.CharField(allow_blank=False)
-    role = serializers.CharField(allow_blank=False, read_only=True)
+    email = serializers.EmailField(read_only=True)
+    bio = serializers.CharField(max_length=255, allow_blank=True)
+    first_name = serializers.CharField(max_length=150, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, allow_blank=True)
+    role = serializers.CharField(read_only=True)
 
     class Meta:
         model = UserProfile
@@ -130,14 +130,6 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
             "last_name",
             "role",
         ]
-
-    def validate_email(self, email):
-        email = email.lower()
-        try:
-            UserProfile.objects.get(email=email)
-            raise serializers.ValidationError(f"The email address '{email}' is already registered.")
-        except UserProfile.DoesNotExist:
-            return email
 
     def validate_username(self, username):
         try:
@@ -151,16 +143,6 @@ class UserProfilePrivateSerializer(serializers.ModelSerializer):
             except ValueError as e:
                 raise serializers.ValidationError(str(e))
             return username
-
-    def validate_role(self, role):
-        role = role.upper()
-        role_list = [UserProfile.ADMIN, UserProfile.AUTHOR, UserProfile.READER]
-
-        if role not in role_list:
-            raise serializers.ValidationError(
-                f"The role must be one of the following: {role_list}."
-            )
-        return role
 
 
 class AccountSerializer(serializers.ModelSerializer):
