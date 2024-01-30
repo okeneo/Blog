@@ -191,10 +191,12 @@ SIMPLE_JWT = {
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
 
 # Variables for verifying a new user's email address.
 VERIFICATION_EMAIL_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
@@ -208,5 +210,3 @@ VERIFICATION_RESET_PASSWORD_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
 
 # Determines the period in which a user can verify their account during registration.
 MAX_TIME_TO_CONFIRM_EMAIL = 3 * 24 * 60 * 60  # 3 days.
-
-DEFAULT_FROM_EMAIL = "okenetega@gmail.com"

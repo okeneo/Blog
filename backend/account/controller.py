@@ -41,7 +41,7 @@ def send_verification_email(template, email, token_key):
             message=message,
             from_email=None,
             recipient_list=[email],
-            fail_silently=True,
+            fail_silently=False,
         )
     else:
         raise ValueError(f"Unsupported email template: {template}.")

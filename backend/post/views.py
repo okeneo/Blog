@@ -32,7 +32,7 @@ class PostListView(APIView):
 
         The user must be logged in (authenticated) and be an author.
         """
-        # They must be creating a post under their account.
+        # TODO: They must be creating a post under their account.
         serializer = PostWriteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -131,7 +131,7 @@ class CommentDetailView(APIView):
         """Delete a comment."""
         comment = get_object_or_404(Comment, pk=pk)
 
-        if comment.filter(parent_comment__isnull=False):
-            comment.delete()
-        else:
+        if comment.replies.exist():
             comment.soft_delete()
+        else:
+            comment.delete()
