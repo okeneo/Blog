@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -8,6 +10,14 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from .controller import (
+    send_verification_email,
+    validate_email_token_key,
+    validate_email_update_token_key,
+    validate_new_email,
+    validate_resend_verification_email_operation,
+    validate_reset_password_token_key,
+)
 from .models import (
     UserProfile,
     VerificationEmailToken,
@@ -24,17 +34,30 @@ from .serializers import (
     UserProfilePublicSerializer,
     UserRegisterSerializer,
 )
-from .controller import (
-    send_verification_email,
-    validate_email_token_key,
-    validate_email_update_token_key,
-    validate_new_email,
-    validate_resend_verification_email_operation,
-    validate_reset_password_token_key,
-)
 
 
 class RegisterView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "username": openapi.Schema(type=openapi.TYPE_STRING),
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+                "password1": openapi.Schema(type=openapi.TYPE_STRING),
+                "password2": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=[
+                "username",
+                "email",
+                "password1",
+                "password2",
+            ],
+        ),
+        responses={
+            201: "Created",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
         """Create a new user and send them a verification email.
 
@@ -59,6 +82,21 @@ class RegisterView(APIView):
 
 
 class ResendVerificationEmailView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=[
+                "email",
+            ],
+        ),
+        responses={
+            204: "No Content",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
         """Resend a user another email to verify the email address on their newly created
         account."""
@@ -88,6 +126,17 @@ class ResendVerificationEmailView(APIView):
 
 
 class VerifyEmailView(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "token_key", openapi.IN_QUERY, description="Token Key", type=openapi.TYPE_STRING
+            )
+        ],
+        responses={
+            204: "No Content",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
         """Check the validity of the verification token to complete a new user's registration."""
         token_key = self.request.query_params.get("token_key")
@@ -114,6 +163,21 @@ class EmailUpdateView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "new_email": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=[
+                "new_email",
+            ],
+        ),
+        responses={
+            204: "No Content",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
         """Update a user's email address by sending a verification link to their new email."""
         new_email = request.data.get("new_email")
@@ -143,6 +207,17 @@ class EmailUpdateView(APIView):
 
 
 class VerifyEmailUpdateView(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "token_key", openapi.IN_QUERY, description="Token Key", type=openapi.TYPE_STRING
+            )
+        ],
+        responses={
+            204: "No Content",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
         """Check the validity of the verification token to update a user's new email address."""
         token_key = self.request.query_params.get("token_key")
@@ -172,7 +247,24 @@ class VerifyEmailUpdateView(APIView):
 
 
 class ResetPasswordView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=[
+                "email",
+            ],
+        ),
+        responses={
+            204: "No Content",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
+        """Reset the password on a user's account. This represents the 'forgot password'
+        functionality"""
         email = request.data.get("email")
         user = get_object_or_404(UserProfile, email=email)
 
@@ -193,6 +285,28 @@ class ResetPasswordView(APIView):
 
 
 class VerifyResetPasswordView(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "token_key", openapi.IN_QUERY, description="Token Key", type=openapi.TYPE_STRING
+            )
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "new_password1": openapi.Schema(type=openapi.TYPE_STRING),
+                "new_password2": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=[
+                "new_password1",
+                "new_password2",
+            ],
+        ),
+        responses={
+            204: "No Content",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
         """Check the validity of the verification token to allow a user to reset their password."""
         token_key = self.request.query_params.get("token_key")
@@ -234,8 +348,20 @@ class UserProfileView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (ReadOnly | (IsAuthenticated & IsOwner),)
 
+    @swagger_auto_schema(
+        tags=["UserProfile"],
+        manual_parameters=[
+            openapi.Parameter(
+                "username", openapi.IN_PATH, description="Username", type=openapi.TYPE_STRING
+            ),
+        ],
+        responses={
+            204: "No Content",
+            400: "Bad Request",
+        },
+    )
     def get(self, request, username, *args, **kwargs):
-        """Get the user profile.
+        """Get a user's profile.
 
         The user must be logged in (authenticated) and must either be the owner of the account,
         or have the admin role in order to view private data.
