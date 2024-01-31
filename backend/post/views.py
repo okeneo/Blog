@@ -1,5 +1,6 @@
 from account.permissions import IsAdminUser, IsAuthor, IsOwner, ReadOnly
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -21,14 +22,28 @@ class PostListView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (ReadOnly | (IsAuthenticated & IsAuthor),)
 
+    @swagger_auto_schema(
+        responses={
+            200: PostDetailSerializer(many=True),
+        }
+    )
     def get(self, request, *args, **kwargs):
         """Get all posts."""
         posts = Post.objects.all()
         serializer = PostDetailSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=PostWriteSerializer,
+        responses={
+            201: PostWriteSerializer,
+            400: "Bad Request",
+            401: "Unauthorized Request",
+        },
+    )
     def post(self, request, *args, **kwargs):
         """Create a new post.
+
         The user must be logged in (authenticated) and be an author.
         """
         # TODO: They must be creating a post under their account.
@@ -43,12 +58,27 @@ class PostDetailView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (ReadOnly | (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner))),)
 
+    @swagger_auto_schema(
+        response={
+            200: PostDetailSerializer,
+            401: "Unauthorized Request",
+            404: "Post Not Found",
+        }
+    )
     def get(self, request, pk, *args, **kwargs):
         """Get a post."""
         post = get_object_or_404(Post, pk=pk)
         serializer = PostDetailSerializer(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        response={
+            200: PostWriteSerializer,
+            400: "Bad Request",
+            401: "Unauthorized Request",
+            404: "Post Not Found",
+        }
+    )
     def put(self, request, pk, *args, **kwargs):
         """Update a post.
 
@@ -61,6 +91,13 @@ class PostDetailView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        response={
+            200: "Sucessful Response",
+            401: "Unauthorized Request",
+            404: "Post Not Found",
+        }
+    )
     def delete(self, request, pk, *args, **kwargs):
         """Delete a post.
 
@@ -68,13 +105,21 @@ class PostDetailView(APIView):
         """
         post = get_object_or_404(Post, pk=pk)
         post.delete()
-        return Response({"detail": "Post deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "Post deleted successfully."}, status=status.HTTP_200_OK)
 
 
 class PublishPostView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner)),)
 
+    @swagger_auto_schema(
+        responses={
+            200: "Successful Response",
+            400: "Bad Request",
+            401: "Unauthorized Request",
+            404: "Post Not Found",
+        }
+    )
     def post(self, request, pk, *args, **kwargs):
         """Publish an existing post."""
         post = get_object_or_404(Post, pk=pk)
@@ -91,20 +136,15 @@ class PublishPostView(APIView):
             )
 
 
-class CategoryListView(ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-
-
-class TagListView(ListAPIView):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-
-
 class PostCommentsView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
+    @swagger_auto_schema(
+        responses={
+            200: CommentTreeSerializer(many=True),
+        }
+    )
     def get(self, request, pk, *args, **kwargs):
         """Get all comments under a post."""
         post = get_object_or_404(Post, pk=pk)
@@ -127,6 +167,13 @@ class CommentDetailView(APIView):
     def put(self, request, pk, *args, **kwargs):
         pass
 
+    @swagger_auto_schema(
+        responses={
+            200: "Successful Response",
+            401: "Unauthorized Request",
+            404: "Comment Not Found",
+        }
+    )
     def delete(self, request, pk, *args, **kwargs):
         """Delete a comment."""
         comment = get_object_or_404(Comment, pk=pk)
@@ -135,3 +182,29 @@ class CommentDetailView(APIView):
             comment.soft_delete()
         else:
             comment.delete()
+
+
+class CategoryListView(ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    @swagger_auto_schema(
+        Categorys=["post"],
+        operation_description="List all categories.",
+        responses={200: CategorySerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        super().list(request, *args, **kwargs)
+
+
+class TagListView(ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+    @swagger_auto_schema(
+        tags=["post"],
+        operation_description="List all tags.",
+        responses={200: TagSerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        super().list(request, *args, **kwargs)

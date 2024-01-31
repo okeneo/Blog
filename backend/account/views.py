@@ -157,9 +157,7 @@ class VerifyEmailView(APIView):
         # Delete the verification token once the user has been registered successfully.
         token.delete()
 
-        return Response(
-            {"detail": "User registration complete."}, status=status.HTTP_200_OK
-        )
+        return Response({"detail": "User registration complete."}, status=status.HTTP_200_OK)
 
 
 class EmailUpdateView(APIView):
@@ -180,6 +178,7 @@ class EmailUpdateView(APIView):
         responses={
             200: "Successful Response",
             400: "Bad Request",
+            401: "Unauthorized Request",
         },
     )
     def post(self, request, *args, **kwargs):
@@ -246,9 +245,7 @@ class VerifyEmailUpdateView(APIView):
         # Delete the verification token once the user has changed their email successfully.
         token.delete()
 
-        return Response(
-            {"detail": "Email updated successfully."}, status=status.HTTP_200_OK
-        )
+        return Response({"detail": "Email updated successfully."}, status=status.HTTP_200_OK)
 
 
 class ResetPasswordView(APIView):
@@ -267,6 +264,7 @@ class ResetPasswordView(APIView):
             200: "Successful Response",
             400: "Bad Request",
             401: "Unauthorized Request",
+            404: "User Not Found",
         },
     )
     def post(self, request, *args, **kwargs):
@@ -339,9 +337,7 @@ class VerifyResetPasswordView(APIView):
             # Delete the verification token once the user has reset their password successfully.
             token.delete()
 
-            return Response(
-                {"detail": "Password reset successfully."}, status=status.HTTP_200_OK
-            )
+            return Response({"detail": "Password reset successfully."}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -363,8 +359,9 @@ class UserProfileView(APIView):
             ),
         ],
         responses={
-            200: "Successful Response",
+            200: UserProfilePublicSerializer,
             400: "Bad Request",
+            404: "User Not Found",
         },
     )
     def get(self, request, username, *args, **kwargs):
@@ -396,8 +393,10 @@ class UserProfileView(APIView):
             ),
         ],
         responses={
-            200: "Successful Response",
+            200: UserProfilePrivateSerializer,
             400: "Bad Request",
+            401: "Unauthorized Request",
+            404: "User Not Found",
         },
     )
     def put(self, request, username, *args, **kwargs):
@@ -424,9 +423,10 @@ class AccountView(APIView):
             ),
         ],
         responses={
-            200: "Successful Response",
+            200: AccountSerializer,
             400: "Bad Request",
             401: "Unauthorized Request",
+            404: "User Not Found",
         },
     )
     def get(self, request, username, *args, **kwargs):
@@ -452,6 +452,7 @@ class AccountView(APIView):
             200: "Successful Response",
             400: "Bad Request",
             401: "Unauthorized Request",
+            404: "User Not Found",
         },
     )
     def delete(self, request, username, *args, **kwargs):
