@@ -16,15 +16,15 @@ This website serves as a portfolio and place to showcase my projects, skills, an
 
 ## Features
 
-- [Swagger Docs](https://okeneo.github.io/okeneo) API documentation.
+- [Swagger Docs](https://okeneo.github.io/PersonalNest/) API documentation.
 - Comprehensive unit tests.
 - Blog section for sharing insights and updates.
   - Includes signup and login with JWT authentication.
 
 ## Demo
 
-Visit [https://okeneo.github.io/okeneo](https://okeneo.github.io/okeneo) to see the API documentation.  
-Visit [https://okeneo.github.io/okeneo](https://okeneo.github.io/okeneo) to see the live demo of the website.
+Visit [https://okeneo.github.io/PersonalNest/](https://okeneo.github.io/PersonalNest/) to see the API documentation.  
+Visit [https://okeneo.github.io/TBD/](https://okeneo.github.io/TBD/) to see the live demo of the website.
 
 ## Technologies Used
 
