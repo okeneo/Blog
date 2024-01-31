@@ -250,7 +250,7 @@ class VerifyEmailUpdateView(APIView):
 
 class ResetPasswordView(APIView):
     @swagger_auto_schema(
-        tags=["password-reset"],
+        tags=["password"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -291,7 +291,7 @@ class ResetPasswordView(APIView):
 
 class VerifyResetPasswordView(APIView):
     @swagger_auto_schema(
-        tags=["password-reset"],
+        tags=["password"],
         manual_parameters=[
             openapi.Parameter(
                 "token_key", openapi.IN_QUERY, description="Token Key", type=openapi.TYPE_STRING
@@ -467,6 +467,7 @@ class PasswordChangeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     @swagger_auto_schema(
+        tags=["password"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={

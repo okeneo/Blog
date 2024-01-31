@@ -101,7 +101,7 @@ paths:
         '401':
           description: Unauthorized Request
       tags:
-      - password-change
+      - password
     parameters: []
   /post/:
     get:
@@ -342,7 +342,7 @@ paths:
         '404':
           description: User Not Found
       tags:
-      - password-reset
+      - password
     parameters: []
   /token/:
     post:
@@ -550,7 +550,7 @@ paths:
         '400':
           description: Bad Request
       tags:
-      - password-reset
+      - password
     parameters: []
 definitions:
   Account:
