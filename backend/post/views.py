@@ -184,27 +184,25 @@ class CommentDetailView(APIView):
             comment.delete()
 
 
-class CategoryListView(ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-
+class CategoryListView(APIView):
     @swagger_auto_schema(
         Categorys=["post"],
         operation_description="List all categories.",
         responses={200: CategorySerializer(many=True)},
     )
-    def list(self, request, *args, **kwargs):
-        super().list(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class TagListView(ListAPIView):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-
+class TagListView(APIView):
     @swagger_auto_schema(
         tags=["post"],
         operation_description="List all tags.",
         responses={200: TagSerializer(many=True)},
     )
-    def list(self, request, *args, **kwargs):
-        super().list(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        tags = Tag.objects.all()
+        serializer = TagSerializer(tags, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
