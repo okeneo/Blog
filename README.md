@@ -34,6 +34,7 @@ Visit [https://okeneo.github.io/TBD/](https://okeneo.github.io/TBD/) to see the 
 - AWS
 - Apache
 - Django REST framework
+- Celery + Redis
 - JSON Web Token (JWT)
 - PostgreSQL
 
