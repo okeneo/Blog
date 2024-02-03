@@ -6,7 +6,7 @@ from .models import (
     UserProfile,
     VerificationEmailToken,
     VerificationEmailUpdateToken,
-    VerificationResetPasswordToken,
+    VerificationPasswordResetToken,
 )
 
 # from django.urls import reverse
@@ -73,8 +73,8 @@ def validate_email_update_token_key(token_key):
 
 def validate_reset_password_token_key(token_key):
     try:
-        token = VerificationResetPasswordToken.objects.get(key=token_key)
-    except VerificationResetPasswordToken.DoesNotExist:
+        token = VerificationPasswordResetToken.objects.get(key=token_key)
+    except VerificationPasswordResetToken.DoesNotExist:
         raise ValidationError("Invalid verification token.")
 
     if token.is_expired:

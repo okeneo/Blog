@@ -8,7 +8,7 @@ info:
   license:
     name: MIT License
   version: v1
-host: 127.0.0.1:8000
+host: localhost:8000
 schemes:
 - http
 basePath: /blog
@@ -100,6 +100,35 @@ paths:
           description: Bad Request
         '401':
           description: Unauthorized Request
+      tags:
+      - password
+    parameters: []
+  /password-reset/:
+    post:
+      operationId: password-reset_create
+      description: |-
+        Reset the password on a user's account. This represents the 'forgot password'
+        functionality.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          required:
+          - email
+          type: object
+          properties:
+            email:
+              type: string
+      responses:
+        '200':
+          description: Successful Response
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized Request
+        '404':
+          description: User Not Found
       tags:
       - password
     parameters: []
@@ -315,35 +344,6 @@ paths:
       tags:
       - register
     parameters: []
-  /reset-password/:
-    post:
-      operationId: reset-password_create
-      description: |-
-        Reset the password on a user's account. This represents the 'forgot password'
-        functionality.
-      parameters:
-      - name: data
-        in: body
-        required: true
-        schema:
-          required:
-          - email
-          type: object
-          properties:
-            email:
-              type: string
-      responses:
-        '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized Request
-        '404':
-          description: User Not Found
-      tags:
-      - password
-    parameters: []
   /token/:
     post:
       operationId: token_create
@@ -521,9 +521,9 @@ paths:
       tags:
       - register
     parameters: []
-  /verify-reset-password/:
+  /verify-password-reset/:
     post:
-      operationId: verify-reset-password_create
+      operationId: verify-password-reset_create
       description: Check the validity of the verification token to allow a user to
         reset their password.
       parameters:

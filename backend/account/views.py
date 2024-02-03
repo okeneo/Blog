@@ -22,7 +22,7 @@ from .models import (
     UserProfile,
     VerificationEmailToken,
     VerificationEmailUpdateToken,
-    VerificationResetPasswordToken,
+    VerificationPasswordResetToken,
 )
 from .permissions import IsAdminUser, IsOwner, ReadOnly
 from .serializers import (
@@ -248,7 +248,7 @@ class VerifyEmailUpdateView(APIView):
         return Response({"detail": "Email updated successfully."}, status=status.HTTP_200_OK)
 
 
-class ResetPasswordView(APIView):
+class PasswordResetView(APIView):
     @swagger_auto_schema(
         tags=["password"],
         request_body=openapi.Schema(
@@ -277,19 +277,19 @@ class ResetPasswordView(APIView):
         if not user.is_active and user.is_email_verified:
             return Response({"error": "Unauthroized access."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        token, created = VerificationResetPasswordToken.objects.get_or_create(user=user)
+        token, created = VerificationPasswordResetToken.objects.get_or_create(user=user)
         if not created:
-            # If a VerificationResetPasswordToken token already exists for this user, create a new
+            # If a VerificationPasswordResetToken token already exists for this user, create a new
             # one to ensure we are always using a new UUID for the token key.
             token.delete()
-            token = VerificationResetPasswordToken.objects.create(user=user)
+            token = VerificationPasswordResetToken.objects.create(user=user)
 
         send_verification_email("reset_password", user.email, token.key)
 
         return Response({"detail": "Password reset email sent"}, status=status.HTTP_200_OK)
 
 
-class VerifyResetPasswordView(APIView):
+class VerifyPasswordResetView(APIView):
     @swagger_auto_schema(
         tags=["password"],
         manual_parameters=[

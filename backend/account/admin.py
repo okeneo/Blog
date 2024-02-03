@@ -5,7 +5,7 @@ from .models import (
     UserProfile,
     VerificationEmailToken,
     VerificationEmailUpdateToken,
-    VerificationResetPasswordToken,
+    VerificationPasswordResetToken,
 )
 
 
@@ -66,9 +66,9 @@ class VerificationEmailUpdateTokenAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(VerificationResetPasswordToken)
-class VerificationResetPasswordTokenAdmin(admin.ModelAdmin):
-    model = VerificationResetPasswordToken
+@admin.register(VerificationPasswordResetToken)
+class VerificationPasswordResetTokenAdmin(admin.ModelAdmin):
+    model = VerificationPasswordResetToken
 
     list_display = (
         "user",

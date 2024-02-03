@@ -98,7 +98,7 @@ class VerificationEmailUpdateToken(BaseVerificationToken):
         return super().is_expired(settings.VERIFICATION_EMAIL_UPDATE_TOKEN_EXPIRY_LIFE)
 
 
-class VerificationResetPasswordToken(BaseVerificationToken):
+class VerificationPasswordResetToken(BaseVerificationToken):
     """This is used to allow a user to reset their password."""
 
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)

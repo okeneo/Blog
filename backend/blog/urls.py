@@ -4,11 +4,11 @@ from account.views import (
     PasswordChangeView,
     RegisterView,
     ResendVerificationEmailView,
-    ResetPasswordView,
+    PasswordResetView,
     UserProfileView,
     VerifyEmailUpdateView,
     VerifyEmailView,
-    VerifyResetPasswordView,
+    VerifyPasswordResetView,
 )
 from django.urls import include, path
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
@@ -16,7 +16,7 @@ from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("update-email/", EmailUpdateView.as_view(), name="update_email"),
-    path("reset-password/", ResetPasswordView.as_view(), name="reset_password"),
+    path("password-reset/", PasswordResetView.as_view(), name="password_reset"),
     path(
         "resend-verification-email/",
         ResendVerificationEmailView.as_view(),
@@ -24,7 +24,7 @@ urlpatterns = [
     ),
     path("verify-email/", VerifyEmailView.as_view(), name="verify_email"),
     path("verify-email-update/", VerifyEmailUpdateView.as_view(), name="verify_email_update"),
-    path("verify-reset-password/", VerifyResetPasswordView.as_view(), name="verify_reset_password"),
+    path("verify-password-reset/", VerifyPasswordResetView.as_view(), name="verify_reset_password"),
     path("token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/blacklist/", TokenBlacklistView.as_view(), name="token_blacklist"),
