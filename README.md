@@ -47,7 +47,7 @@ Visit [https://okeneo.github.io/TBD/](https://okeneo.github.io/TBD/) to see the 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/okeneo/okeneo-repo.git
+   git clone https://github.com/okeneo/PersonalNest.git
    ```
 
 ### Backend Setup
