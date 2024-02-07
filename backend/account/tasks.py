@@ -7,7 +7,6 @@ def send_verification_email_task(template, email, token_key):
     from .controller import EMAIL_TEMPLATES
 
     template = EMAIL_TEMPLATES.get(template)
-
     if template:
         subject = template["subject"]
         message = template["message"].format(token_key=token_key)
