@@ -216,5 +216,15 @@ VERIFICATION_RESET_PASSWORD_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
 # Determines the period in which a user can verify their account during registration.
 MAX_TIME_TO_CONFIRM_EMAIL = 3 * 24 * 60 * 60  # 3 days.
 
-# Add password to Redis instance before deploying to production.
-CELERY_BROKER_URL = "redis://localhost:6379"
+# Add username and password to Redis instance before deploying to production.
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
