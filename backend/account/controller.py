@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.core.validators import validate_email
 
 from .models import (
@@ -8,6 +7,7 @@ from .models import (
     VerificationEmailUpdateToken,
     VerificationPasswordResetToken,
 )
+from .tasks import send_verification_email_task
 
 # from django.urls import reverse
 # verification_url = reverse("email_confimation")
@@ -30,21 +30,7 @@ EMAIL_TEMPLATES = {
 
 
 def send_verification_email(template, email, token_key):
-    template = EMAIL_TEMPLATES.get(template)
-
-    if template:
-        subject = template["subject"]
-        message = template["message"].format(token_key=token_key)
-        # Send emails asynchronously?
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=None,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-    else:
-        raise ValueError(f"Unsupported email template: {template}.")
+    send_verification_email_task.delay(template, email, token_key)
 
 
 def validate_email_token_key(token_key):
