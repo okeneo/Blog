@@ -12,6 +12,22 @@ services:
       - ../.env
     depends_on:
       - postgres-db
+  
+  celery:
+    build: .
+    command: celery -A myproject worker -l INFO
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+    env_file:
+      - ../.env
+    depends_on:
+      - api
+      - redis
+    
+  redis:
+    image: redis:7.2.4-alpine
+    command: redis-server
+  
   postgres-db:
     image: postgres:16
     volumes:
