@@ -8,7 +8,7 @@ info:
 host: localhost:8000
 schemes:
 - http
-basePath: /
+basePath: /api
 consumes:
 - application/json
 produces:
@@ -19,9 +19,9 @@ securityDefinitions:
 security:
 - Basic: []
 paths:
-  /register/:
+  /auth/register/:
     post:
-      operationId: register_create
+      operationId: auth_register_create
       description: Register a new user.
       parameters:
       - name: data
@@ -35,11 +35,11 @@ paths:
         '400':
           description: Bad Request
       tags:
-      - register
+      - auth
     parameters: []
-  /token/:
+  /auth/token/:
     post:
-      operationId: token_create
+      operationId: auth_token_create
       description: |-
         Takes a set of user credentials and returns an access and refresh JSON web
         token pair to prove the authentication of those credentials.
@@ -55,11 +55,11 @@ paths:
           schema:
             $ref: '#/definitions/TokenObtainPair'
       tags:
-      - token
+      - auth
     parameters: []
-  /token/refresh/:
+  /auth/token/refresh/:
     post:
-      operationId: token_refresh_create
+      operationId: auth_token_refresh_create
       description: |-
         Takes a refresh type JSON web token and returns an access type JSON web
         token if the refresh token is valid.
@@ -75,7 +75,22 @@ paths:
           schema:
             $ref: '#/definitions/TokenRefresh'
       tags:
-      - token
+      - auth
+    parameters: []
+  /schools/:
+    get:
+      operationId: schools_list
+      description: List all schools.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/School'
+      tags:
+      - schools
     parameters: []
 definitions:
   UserRegister:
@@ -150,3 +165,16 @@ definitions:
         type: string
         readOnly: true
         minLength: 1
+  School:
+    required:
+    - name
+    type: object
+    properties:
+      name:
+        title: Name
+        type: string
+        enum:
+        - University of Manitoba
+        - Univerisity of Winnipeg
+        - RRC Polytech
+        - Université de Saint-Boniface
