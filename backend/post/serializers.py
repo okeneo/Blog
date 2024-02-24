@@ -51,8 +51,8 @@ class CommentTreeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_replies(self, obj):
-        # Recursively serialize replies.
-        # replies represents the immediate descendants (i.e., children) of a particular comment.
+        # Recursively serialize replies. `replies` represents the immediate children
+        # of a particular comment.
         replies = Comment.objects.filter(post=obj.post, parent_comment=obj)
         serializer = CommentTreeSerializer(replies, many=True)
         return serializer.data
