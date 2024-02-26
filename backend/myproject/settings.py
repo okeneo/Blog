@@ -14,6 +14,10 @@ from datetime import timedelta
 from pathlib import Path
 
 from decouple import config
+from dotenv import load_dotenv
+
+# Reload environment variables on startup to avoid caching them.
+load_dotenv(verbose=True, override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

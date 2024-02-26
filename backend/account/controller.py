@@ -14,11 +14,11 @@ from .tasks import send_verification_email_task
 EMAIL_TEMPLATES = {
     "registration": {
         "subject": "Verify your email address",
-        "message": "http://localhost:8000/blog/verify-email/?token_key={token_key}",
+        "message": "http://localhost:8000/api/blog/verify-email/?token_key={token_key}",
     },
     "update_email": {
         "subject": "Email Update Verification",
-        "message": "http://localhost:8000/blog/verify-email-update/?token_key={token_key}"
+        "message": "http://localhost:8000/api/blog/verify-email-update/?token_key={token_key}"
         + "\nIf you didn't change it, you should click this link to recover it.",
     },
     "reset_password": {

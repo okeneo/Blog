@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import include, path, re_path
 from drf_yasg import openapi
@@ -22,9 +23,9 @@ from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Blog API",
+        title="Personal Website API",
         default_version="v1",
-        description="API Documentation for my Blog",
+        description="API Documentation for my personal website.",
         terms_of_service="https://github.com/okeneo/PersonalNest/blob/main/LICENSE",
         contact=openapi.Contact("okenetega@gmail.com"),
         license=openapi.License("MIT License"),
@@ -35,13 +36,13 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("blog/", include("blog.urls")),
+    path("api/admin/", admin.site.urls),
+    path("api/blog/", include("blog.urls")),
     re_path(
-        r"^swagger(?P<format>\.json|\.yaml)$",
+        r"^api/swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
         name="schema-json",
     ),
-    path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
-    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    path("api/swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path("api/redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
