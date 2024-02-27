@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.urls import reverse_lazy
 
 from .models import (
     UserProfile,
@@ -37,8 +38,6 @@ def send_verification_email(template_type, email, token_key):
         email (str): Recipient's email address.
         token_key (str): Unique token key for email verification.
     """
-    from django.urls import reverse_lazy
-
     template = EMAIL_TEMPLATES.get(template_type)
     if not template:
         raise ValueError(f"Unsupported email template: {template}.")
