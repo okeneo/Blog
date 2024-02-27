@@ -15,4 +15,7 @@ COPY . /backend
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn myproject.wsgi:application --bind 0.0.0.0:8000"]
+# COPY ./entrypoint.sh .
+# ENTRYPOINT ["sh", "./entrypoint.sh"]
+
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic && gunicorn myproject.wsgi:application --bind 0.0.0.0:8000"]

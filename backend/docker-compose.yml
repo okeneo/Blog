@@ -10,6 +10,8 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    volumes:
+      - staticfiles:/staticfiles
     depends_on:
       - postgres-db
 
@@ -42,5 +44,16 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
-# volumes:
-#   postgres_data:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - staticfiles:/staticfiles
+    depends_on:
+      - api
+
+volumes:
+  staticfiles: #   postgres_data:
