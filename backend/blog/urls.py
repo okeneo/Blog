@@ -2,9 +2,9 @@ from account.views import (
     CustomTokenObtainPairView,
     EmailUpdateView,
     PasswordChangeView,
+    PasswordResetView,
     RegisterView,
     ResendVerificationEmailView,
-    PasswordResetView,
     UserProfileView,
     VerifyEmailUpdateView,
     VerifyEmailView,
@@ -13,6 +13,7 @@ from account.views import (
 from django.urls import include, path
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
 
+app_name = "blog"
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("update-email/", EmailUpdateView.as_view(), name="update_email"),

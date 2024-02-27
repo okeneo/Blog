@@ -17,7 +17,7 @@ from decouple import config
 from dotenv import load_dotenv
 
 # Reload environment variables on startup to avoid caching them.
-load_dotenv(verbose=True, override=True)
+load_dotenv(dotenv_path="./.env.dev", verbose=True, override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,13 +30,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=0, cast=bool)
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "0.0.0.0",
-]
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="").split(" ")
 
 
 # Application definition
@@ -102,8 +98,8 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME"),
+        "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),
+        "NAME": config("DB_NAME", default=BASE_DIR / "db.sqlite3"),
         "USER": config("DB_USER"),
         "PASSWORD": config("DB_PASSWORD"),
         "HOST": config("DB_HOST"),
@@ -237,3 +233,5 @@ CACHES = {
         },
     }
 }
+
+HOST = config("HOST", default="http://localhost:8000")

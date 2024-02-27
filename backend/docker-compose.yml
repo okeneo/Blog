@@ -6,10 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     image: backend-api:1.0
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
+    entrypoint: ./entrypoint-api.sh
     env_file:
-      - .env
+      - .env.dev
     volumes:
       - staticfiles:/staticfiles
     depends_on:
@@ -20,11 +21,11 @@ services:
       context: .
       dockerfile: Dockerfile
     image: backend-celery:1.0
-    command: celery -A myproject worker -l INFO
+    entrypoint: ./entrypoint-celery.sh
     environment:
       - CELERY_BROKER=redis://redis:6379/0
     env_file:
-      - .env
+      - .env.dev
     depends_on:
       - api
       - redis
@@ -32,17 +33,16 @@ services:
   redis:
     image: redis:7.2.4-alpine
     command: redis-server
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
 
   postgres-db:
     image: postgres:15
-    # volumes:
-    #   - postgres_data:/var/lib/postgresql/data/
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file: .env.prod.db
+    expose:
+      - "5432"
 
   nginx:
     build:
@@ -56,4 +56,5 @@ services:
       - api
 
 volumes:
-  staticfiles: #   postgres_data:
+  staticfiles:
+  postgres_data:

@@ -39,8 +39,8 @@ Visit [https://okeneo.github.io/TBD/](https://okeneo.github.io/TBD/) to see the 
 - PostgreSQL
 
 ## Requirements
-- Python 3.11
-- Django 5.0
+- Python 3.11.8
+- Docker 24.0.7
 
 ## Installation
 

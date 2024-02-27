@@ -6,16 +6,12 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /backend
 
-COPY requirements.txt /backend/
+RUN pip install --upgrade pip
 
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+COPY requirements.txt /backend/
+RUN pip install -r requirements.txt
 
 COPY . /backend
 
-EXPOSE 8000
-
-# COPY ./entrypoint.sh .
-# ENTRYPOINT ["sh", "./entrypoint.sh"]
-
-CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic && gunicorn myproject.wsgi:application --bind 0.0.0.0:8000"]
+RUN chmod +x ./entrypoint-api.sh
+RUN chmod +x ./entrypoint-celery.sh

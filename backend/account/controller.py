@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
@@ -9,28 +10,52 @@ from .models import (
 )
 from .tasks import send_verification_email_task
 
-# from django.urls import reverse
-# verification_url = reverse("email_confimation")
 EMAIL_TEMPLATES = {
     "registration": {
         "subject": "Verify your email address",
-        "message": "http://localhost:8000/api/blog/verify-email/?token_key={token_key}",
+        "message": "Follow this link to verify your account.",
+        "url_name": "blog:verify_email",
     },
     "update_email": {
         "subject": "Email Update Verification",
-        "message": "http://localhost:8000/api/blog/verify-email-update/?token_key={token_key}"
-        + "\nIf you didn't change it, you should click this link to recover it.",
+        "message": "If you didn't change it, you should click this link to recover it.",
+        "url_name": "blog:verify-email-update",
     },
     "reset_password": {
         "subject": "Reset Password",
-        "message": "http://localhost:8000/blog/verify-reset-password/?token_key={token_key}"
-        + "\nIf you didn't change it, you should click this link to recover it.",
+        "message": "If you didn't change it, you should click this link to recover it.",
+        "url_name": "blog:verify-password-reset",
     },
 }
 
 
-def send_verification_email(template, email, token_key):
-    send_verification_email_task.delay(template, email, token_key)
+def send_verification_email(template_type, email, token_key):
+    """Send a verification email based on the specified template.
+
+    Args:
+        template_type (str): Type of email template.
+        email (str): Recipient's email address.
+        token_key (str): Unique token key for email verification.
+    """
+    from django.urls import reverse_lazy
+
+    template = EMAIL_TEMPLATES.get(template_type)
+    if not template:
+        raise ValueError(f"Unsupported email template: {template}.")
+
+    # Get email url.
+    url_name = template["url_name"]
+    url = reverse_lazy(url_name)
+    HOST = settings.HOST
+    email_url = f"{HOST}{url}?token_key={token_key}"
+
+    # Collect email subject and message.
+    template_message = template["message"]
+    message = f"{template_message}\n{email_url}"
+    subject = template["subject"]
+
+    # Pass email sending to celery.
+    send_verification_email_task.delay(subject, message, email)
 
 
 def validate_email_token_key(token_key):
