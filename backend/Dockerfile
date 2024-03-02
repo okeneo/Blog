@@ -1,5 +1,7 @@
 FROM python:3.12.2-slim-bookworm
 
+RUN adduser --disabled-password --no-create-home myuser
+
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -15,3 +17,7 @@ COPY . /backend
 
 RUN chmod +x ./entrypoint-api.sh
 RUN chmod +x ./entrypoint-celery.sh
+
+RUN chown -R myuser:myuser /backend
+
+USER myuser
