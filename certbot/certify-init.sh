@@ -4,7 +4,11 @@
 
 set -e
 
-until curl -s -I http://nginx:80; do
+check_nginx() {
+    ping -c 1 nginx
+}
+
+until check_nginx; do
     echo "Waiting for proxy..."
     sleep 5s & wait ${!}
 done
