@@ -4,12 +4,14 @@
 
 set -e
 
-wait_for_proxy() {
-    echo "Waiting for proxy..."
-    sleep 1m
+check_nginx() {
+    ping -c 1 nginx
 }
 
-wait_for_proxy
+until check_nginx; do
+    echo "Waiting for proxy..."
+    sleep 5s & wait ${!}
+done
 
 echo "Getting certificate..."
 
