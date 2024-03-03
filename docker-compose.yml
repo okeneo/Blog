@@ -65,9 +65,6 @@ services:
       context: ./certbot
       dockerfile: Dockerfile
     command: echo "Skipping..."
-    # environment:
-    #   - DOMAIN=${DOMAIN}
-    #   - EMAIL=${ACME_DEFAULT_EMAIL}
     env_file:
       - ./backend/.env.dev
     volumes:

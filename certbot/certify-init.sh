@@ -19,7 +19,7 @@ certbot certonly \
     --webroot \
     --webroor-path "/var/www/certbot" \
     -d "$DOMAIN" \
-    --email $EMAIL \
+    --email "$ACME_DEFAULT_EMAIL" \
     --rsa-key-size 4096 \
     --agree-tos \
     -noninteractive
