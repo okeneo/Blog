@@ -17,7 +17,7 @@ echo "Getting certificate..."
 
 certbot certonly \
     --webroot \
-    --webroot-path "/var/www/" \
+    --webroot-path "/var/www/certbot" \
     -d "$DOMAIN" \
     --email "$ACME_DEFAULT_EMAIL" \
     --rsa-key-size 4096 \

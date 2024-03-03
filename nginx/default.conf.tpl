@@ -4,7 +4,7 @@ server {
     server_tokens off;
 
     location /.well-known/acme-challenge/ {
-        root /var/www/;
+        root /var/www/certbot/;
     }
 
     location / {
