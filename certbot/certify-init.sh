@@ -6,6 +6,7 @@ set -e
 
 until nc -z nginx 80; do
     echo "Waiting for proxy..."
+    netstat -tulnp
     sleep 5s & wait ${!}
 done
 
