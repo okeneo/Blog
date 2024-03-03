@@ -17,6 +17,7 @@ export scheme=\$scheme
 
 echo "Checking for fullchain.pem"
 echo "/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+echo $DOMAIN
 if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
     echo "No SSL certificate. Enabling HTTP only..."
     envsubst < /etc/nginx/default.conf.tpl > /etc/nginx/conf.d/default.conf
