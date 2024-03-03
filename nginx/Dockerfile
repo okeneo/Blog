@@ -9,4 +9,6 @@ ENV API_PORT=8000
 RUN apk add --no-cache openssl bash
 RUN chmod +x /etc/nginx/run.sh
 
+VOLUME /var/www/
+
 CMD ["/etc/nginx/run.sh"]
