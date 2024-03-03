@@ -50,5 +50,4 @@ server {
     location /django-static/ {
         alias /staticfiles/;
     }
-
 }

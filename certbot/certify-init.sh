@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Waits for the proxy to be available, then gets the first certificate.
+# Waits for nginx to be available, then gets the first certificate.
 
 set -e
 
@@ -19,5 +19,4 @@ certbot certonly \
     --rsa-key-size 4096 \
     --agree-tos \
     --non-interactive \
-    --staging \
     -v
