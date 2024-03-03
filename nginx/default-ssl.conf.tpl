@@ -27,7 +27,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-    client_max_body_size 20M;
+    client_max_body_size 10M;
 
     location / {
         alias /var/www/frontend/;
