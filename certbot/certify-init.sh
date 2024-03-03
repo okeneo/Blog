@@ -22,4 +22,4 @@ certbot certonly \
     --email "$ACME_DEFAULT_EMAIL" \
     --rsa-key-size 4096 \
     --agree-tos \
-    -noninteractive
+    --non-interactive
