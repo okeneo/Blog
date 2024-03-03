@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 
 services:
   api:
@@ -54,9 +54,25 @@ services:
     volumes:
       - staticfiles:/staticfiles
       - frontend_build:/var/www/frontend
+      - certbot_certs:/etc/letsencrypt
+      - certbot_web:/var/www/certbot
     depends_on:
       - api
       - frontend
+
+  certbot:
+    build:
+      context: ./certbot
+      dockerfile: Dockerfile
+    command: echo "Skipping..."
+    environment:
+      - DOMAIN=${DOMAIN}
+      - EMAIL=${ACME_DEFAULT_EMAIL}
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_web:/var/www/certbot
+    depends_on:
+      - nginx
 
   frontend:
     build:
@@ -69,3 +85,5 @@ volumes:
   staticfiles:
   frontend_build:
   postgres_data:
+  certbot_certs:
+  certbot_web:
