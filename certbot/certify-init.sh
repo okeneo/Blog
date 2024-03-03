@@ -10,8 +10,6 @@ until nc -z nginx 80; do
 done
 
 echo "Getting certificate..."
-echo $DOMAIN
-echo $ACME_DEFAULT_EMAIL
 
 certbot certonly \
     --webroot \
