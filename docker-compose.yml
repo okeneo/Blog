@@ -10,7 +10,7 @@ services:
       - "8000"
     entrypoint: ./entrypoint-api.sh
     env_file:
-      - ./backend/.env.dev
+      - .env.prod
     volumes:
       - staticfiles:/staticfiles
     depends_on:
@@ -25,7 +25,7 @@ services:
     environment:
       - CELERY_BROKER=redis://redis:6379/0
     env_file:
-      - ./backend/.env.dev
+      - .env.prod
     depends_on:
       - api
       - redis
@@ -40,7 +40,7 @@ services:
     image: postgres:15-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file: ./backend/.env.prod.db
+    env_file: .env.prod.db
     expose:
       - "5432"
 
@@ -52,7 +52,7 @@ services:
       - "80:80"
       - "443:443"
     env_file:
-      - ./backend/.env.dev
+      - .env.prod
     volumes:
       - staticfiles:/staticfiles
       - frontend_build:/var/www/frontend
@@ -68,7 +68,7 @@ services:
       dockerfile: Dockerfile
     command: echo "Skipping..."
     env_file:
-      - ./backend/.env.dev
+      - .env.prod
     volumes:
       - certbot_certs:/etc/letsencrypt
       - certbot_web:/var/www/certbot
