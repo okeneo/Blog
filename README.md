@@ -32,9 +32,9 @@ Visit [https://okeneo.github.io/TBD/](https://okeneo.github.io/TBD/) to see the 
 - React
 - Docker
 - AWS
-- Apache
+- Nginx
 - Django REST framework
-- Celery + Redis
+- Redis + Celery
 - JSON Web Token (JWT)
 - PostgreSQL
 
