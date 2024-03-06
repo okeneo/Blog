@@ -19,5 +19,4 @@ certbot certonly \
     --rsa-key-size 4096 \
     --agree-tos \
     --non-interactive \
-    --staging \
     -v
