@@ -31,3 +31,13 @@ server {
         alias /staticfiles/;
     }
 }
+
+server {
+    listen 443 ssl;
+    server_name ${DOMAIN} www.${DOMAIN};
+    server_tokens off;
+
+    location / {
+        return 301 http://$host$request_uri;
+    }
+}
