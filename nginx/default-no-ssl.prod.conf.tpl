@@ -33,7 +33,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
+    listen 443;
     server_name ${DOMAIN} www.${DOMAIN};
     server_tokens off;
 
