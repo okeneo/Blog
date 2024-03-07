@@ -8,7 +8,6 @@ This website serves as a portfolio and place to showcase my projects, skills, an
 ## Table of Contents
 
 - [Features](#features)
-- [Demo](#demo)
 - [Technologies Used](#technologies-used)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -17,14 +16,9 @@ This website serves as a portfolio and place to showcase my projects, skills, an
 ## Features
 
 - [Swagger Docs](https://okeneo.github.io/PersonalNest/) API documentation.
-- Comprehensive unit tests.
-- Blog section for sharing insights and updates.
+- Blog section for tutorials and sharing my thoughts.
   - Includes signup and login with JWT authentication.
-
-## Demo
-
-Visit [https://okeneo.github.io/PersonalNest/](https://okeneo.github.io/PersonalNest/) to see the API documentation.  
-Visit [https://okeneo.github.io/TBD/](https://okeneo.github.io/TBD/) to see the live demo of the website.
+- Comprehensive unit tests.
 
 ## Technologies Used
 
