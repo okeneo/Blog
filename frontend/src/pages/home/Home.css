@@ -1,0 +1,44 @@
+.home-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 50vh;
+    padding-left: 150px;
+}
+
+.profile-container {
+    display: flex;
+    align-items: flex-end;
+}
+
+.profile-picture {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.info-container {
+    text-align: left;
+    margin-left: 20px;
+    height: 130px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+h2 {
+    margin-top: 7px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #555;
+}
+
+h3 {
+    margin-top: 350px;
+    /* margin-right: 10px; */
+    margin-left: -710px;
+}
