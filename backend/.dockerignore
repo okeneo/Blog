@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+**__pycache__/
 *.py[cod]
 *$py.class
 
@@ -58,8 +58,8 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
+**db.sqlite3
+**db.sqlite3-journal
 
 # Flask stuff:
 instance/
@@ -120,8 +120,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env*
-.venv
+**.env*
+**.venv
 env/
 venv/
 ENV/
@@ -160,11 +160,11 @@ cython_debug/
 #.idea/
 
 # mac
-.DS_store
+**.DS_store
 
 # Redis
-dump.rdb
+**dump.rdb
 
 # Git
-.git
-.gitignore
+**.git
+**.gitignore

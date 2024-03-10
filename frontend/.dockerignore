@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# testing
+coverage
+.coverage
+.coverage.*
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git
+**.git
+**.gitignore
+
+# Distribution / packaging
+**dist/
+
+# Environments
+**.env*
+
+# mac
+**.DS_store

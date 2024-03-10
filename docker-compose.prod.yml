@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: backend-api:1.0
+    image: personalnest-api:1.0
     expose:
       - "8000"
     entrypoint: ./entrypoint-api.sh
@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: backend-celery:1.0
+    image: personalnest-celery:1.0
     entrypoint: ./entrypoint-celery.sh
     environment:
       - CELERY_BROKER=redis://redis:6379/0
@@ -75,6 +75,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: personalnest-frontend:1.0
     volumes:
       - frontend_build:/frontend/build
 
