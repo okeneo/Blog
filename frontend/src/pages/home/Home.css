@@ -9,7 +9,7 @@
 .development-message {
     position: absolute;
     top: 70px;
-    left: 70px;
+    left: 72px;
 }
 
 .profile-container {
@@ -54,7 +54,7 @@ h2 {
 .current-work {
     position: relative;
     margin-top: 85px;
-    margin-right: 500px;
+    margin-right: 490px;
 }
 
 .current-work h3 {
