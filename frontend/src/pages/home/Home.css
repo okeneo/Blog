@@ -58,11 +58,11 @@ h2 {
 }
 
 .current-work h3 {
-    font-size: 27px;
+    font-size: 20px;
 }
 
 .red-text {
-    color: red;
+    color: rgb(210, 139, 5);
     font-weight: bold;
 }
 
