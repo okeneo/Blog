@@ -9,11 +9,12 @@ function MyNavBar() {
                 <Navbar.Brand as={Link} to="/">Tega Okene</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="me-auto">
+                    <Nav className="ms-auto">
                         <Nav.Link as={Link} to="/about">About</Nav.Link>
                         <Nav.Link as={Link} to="/blog">Blog</Nav.Link>
                         <Nav.Link as={Link} to="/projects">Projects</Nav.Link>
                         <Nav.Link as={Link} to="/art">Art</Nav.Link>
+                        <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>

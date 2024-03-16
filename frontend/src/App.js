@@ -4,6 +4,7 @@ import About from "./pages/about/About"
 import Blog from "./pages/blog/Blog"
 import Projects from "./pages/projects/Projects"
 import Art from "./pages/art/Art";
+import Contact from "./pages/contact/Contact";
 import Register from "./pages/register/Register"
 import Login from "./pages/login/Login"
 import Navbar from "./components/Navbar";
@@ -19,6 +20,7 @@ function App() {
           <Route exact path="/blog" element={<Blog />} />
           <Route exact path="/projects" element={<Projects />} />
           <Route exact path="/art" element={<Art />} />
+          <Route exact path="/contact" element={<Contact />} />
           <Route exact path="/register" element={<Register />} />
           <Route exact path="/login" element={<Login />} />
         </Routes>
