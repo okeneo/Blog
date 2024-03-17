@@ -58,6 +58,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    command: echo "Skipping frontend..."
     image: personalnest-frontend:1.0
     volumes:
       - frontend_build:/frontend/build

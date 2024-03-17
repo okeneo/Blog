@@ -63,7 +63,7 @@ services:
     build:
       context: ./certbot
       dockerfile: Dockerfile
-    command: echo "Skipping..."
+    command: echo "Skipping certbot..."
     env_file: .env.prod
     volumes:
       - certbot_certs:/etc/letsencrypt
@@ -75,6 +75,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    command: echo "Skipping frontend..."
     image: personalnest-frontend:1.0
     volumes:
       - frontend_build:/frontend/build
