@@ -2,11 +2,10 @@ FROM node:21-alpine as builder
 
 WORKDIR /frontend
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY package*.json ./
 
-RUN npm ci
+RUN npm run install
 
 COPY . /frontend
 
-CMD ["npm", "run", "build"]
+RUN npm run build
