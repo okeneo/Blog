@@ -9,6 +9,10 @@ server {
 
     client_max_body_size 10M;
 
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
     location / {
         alias /var/www/frontend/;
         try_files $uri $uri/ /index.html;
@@ -29,15 +33,5 @@ server {
 
     location /django-static/ {
         alias /staticfiles/;
-    }
-}
-
-server {
-    listen 443;
-    server_name ${DOMAIN} www.${DOMAIN};
-    server_tokens off;
-
-    location / {
-        return 301 http://$host$request_uri;
     }
 }
