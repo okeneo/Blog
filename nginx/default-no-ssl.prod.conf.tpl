@@ -4,12 +4,8 @@ upstream myproject {
 
 server {
     listen 80;
-    server_name ${DOMAIN} www.${DOMAIN};
+    server_name www.${DOMAIN};
     server_tokens off;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
 
     location / {
         return 301 http://${DOMAIN}$request_uri;
