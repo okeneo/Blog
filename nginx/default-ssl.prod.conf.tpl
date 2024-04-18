@@ -4,6 +4,12 @@ upstream myproject {
 
 server {
     listen 80;
+    server_name www.${DOMAIN};
+    return 301 $scheme://${DOMAIN}$request_uri;
+}
+
+server {
+    listen 80;
     server_name ${DOMAIN} www.${DOMAIN};
     server_tokens off;
 
@@ -18,7 +24,7 @@ server {
 
 server {
     listen 443 ssl;
-    server_name ${DOMAIN} www.${DOMAIN};
+    server_name ${DOMAIN};
     server_tokens off;
 
     ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
