@@ -4,13 +4,7 @@ upstream myproject {
 
 server {
     listen 80;
-    server_name www.${DOMAIN};
-    return 301 $scheme://${DOMAIN}$request_uri;
-}
-
-server {
-    listen 80;
-    server_name ${DOMAIN};
+    server_name ${DOMAIN} www.${DOMAIN};
     server_tokens off;
 
     location /.well-known/acme-challenge/ {
@@ -19,6 +13,22 @@ server {
 
     location / {
         return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name www.${DOMAIN};
+    server_tokens off;
+
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include /etc/nginx/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    location / {
+        return 301 https://${DOMAIN}$request_uri;
     }
 }
 
