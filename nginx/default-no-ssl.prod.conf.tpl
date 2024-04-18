@@ -7,11 +7,21 @@ server {
     server_name ${DOMAIN} www.${DOMAIN};
     server_tokens off;
 
-    client_max_body_size 10M;
-
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
+
+    location / {
+        return 301 http://${DOMAIN}$request_uri;
+    }
+}
+
+server {
+    listen 80;
+    server_name ${DOMAIN};
+    server_tokens off;
+
+    client_max_body_size 10M;
 
     location / {
         alias /var/www/frontend/;
@@ -27,7 +37,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_redirect off;
-        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Proto http;
         proxy_set_header X-Url-Scheme $scheme;
     }
 
