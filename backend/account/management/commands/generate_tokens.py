@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from rest_framework.authtoken.models import Token
@@ -21,7 +21,6 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         usernames = options["usernames"]
-        User = get_user_model()
         if usernames:
             users = User.objects.filter(username__in=usernames)
             if not users:

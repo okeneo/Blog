@@ -1,12 +1,8 @@
 import json
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import Client, TestCase
-
-from .models import VerificationEmailToken
-
-User = get_user_model()
 
 # Writing tests:
 # Create objects via database API (not endpoints) except when not directly testing that endpoint.
@@ -448,36 +444,3 @@ class LoginUserTest(TestCase):
 
 # Test retrieving a user profile with different token and username combinations.
 # e.g., Can a user use another user's token?
-
-
-class VerificationEmailTokenTest(TestCase):
-    def test_duplicate_UUID(self):
-        """This tests that in the astronomically unlikely chance that a key is created with a
-        UUID that already exists in the database, our overriding save method will generate a new
-        UUID as the key."""
-        # Create users.
-        user_1 = User.objects.create_user(
-            username="new_user_1", email="new_user_1@gmail.com", password="@123tza.."
-        )
-
-        user_2 = User.objects.create_user(
-            username="new_user_2", email="new_user_2@gmail.com", password="@123tza.."
-        )
-
-        token_1 = VerificationEmailToken(user=user_1)
-        token_1.save()
-        token_1_key = token_1.key
-
-        token_2 = VerificationEmailToken(user=user_2, key=token_1_key)
-        token_2.save()
-        token_2_key = token_2.key
-        self.assertNotEqual(token_1_key, token_2_key)
-
-    def test_at_most_one_token_per_user(self):
-        # Create a new user.
-        user = User.objects.create_user(
-            username="new_user", email="new_user@gmail.com", password="@123tza.."
-        )
-        VerificationEmailToken.objects.create(user=user)
-        with self.assertRaises(IntegrityError):
-            VerificationEmailToken.objects.create(user=user)

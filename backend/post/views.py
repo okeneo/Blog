@@ -1,4 +1,4 @@
-from account.permissions import IsAdminUser, IsAuthor, IsOwner, ReadOnly
+from account.permissions import IsAdmin, IsAuthor, IsOwner, ReadOnly
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -44,7 +44,7 @@ class PostListView(APIView):
     def post(self, request, *args, **kwargs):
         """Create a new post.
 
-        The user must be logged in (authenticated) and be an author.
+        The user must be authenticated and be an author.
         """
         # TODO: They must be creating a post under their account.
         serializer = PostWriteSerializer(data=request.data)
@@ -56,7 +56,7 @@ class PostListView(APIView):
 
 class PostDetailView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (ReadOnly | (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner))),)
+    permission_classes = (ReadOnly | (IsAuthenticated & (IsAdmin | (IsAuthor & IsOwner))),)
 
     @swagger_auto_schema(
         response={
@@ -82,7 +82,7 @@ class PostDetailView(APIView):
     def put(self, request, pk, *args, **kwargs):
         """Update a post.
 
-        The user must be logged in (authenticated) and must be an admin or the author of the post.
+        The user must be authenticated and must be an admin or the author of the post.
         """
         post = get_object_or_404(Post, pk=pk)
         serializer = PostWriteSerializer(post, data=request.data, partial=True)
@@ -101,7 +101,7 @@ class PostDetailView(APIView):
     def delete(self, request, pk, *args, **kwargs):
         """Delete a post.
 
-        The user must be logged in (authenticated) and must be an admin or the author of the post.
+        The user must be authenticated and must be an admin or the author of the post.
         """
         post = get_object_or_404(Post, pk=pk)
         post.delete()
@@ -110,7 +110,7 @@ class PostDetailView(APIView):
 
 class PublishPostView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated & (IsAdminUser | (IsAuthor & IsOwner)),)
+    permission_classes = (IsAuthenticated & (IsAdmin | (IsAuthor & IsOwner)),)
 
     @swagger_auto_schema(
         responses={

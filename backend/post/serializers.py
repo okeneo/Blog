@@ -1,4 +1,4 @@
-from account.serializers import UserProfilePublicSerializer
+from account.serializers import ProfileSerializer
 from rest_framework import serializers
 
 from .models import Category, Comment, Post, Tag
@@ -16,33 +16,6 @@ class TagSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PostDetailSerializer(serializers.ModelSerializer):
-    """Serializer for retrieving detailed information about a post. Includes nested
-    serializers for tags, category, and author.
-    """
-
-    author = UserProfilePublicSerializer()
-    category = CategorySerializer()
-    tags = TagSerializer(many=True)
-
-    class Meta:
-        model = Post
-        fields = "__all__"
-
-
-class PostWriteSerializer(serializers.ModelSerializer):
-    """Serializer for creating and updating posts."""
-
-    class Meta:
-        model = Post
-        exclude = [
-            "date_created",
-            "date_modified",
-            "publish_date",
-            "published",
-        ]
-
-
 class CommentTreeSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField()
 
@@ -56,3 +29,24 @@ class CommentTreeSerializer(serializers.ModelSerializer):
         replies = Comment.objects.filter(post=obj.post, parent_comment=obj)
         serializer = CommentTreeSerializer(replies, many=True)
         return serializer.data
+
+
+class PostDetailSerializer(serializers.ModelSerializer):
+    author = ProfileSerializer()
+    category = CategorySerializer()
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Post
+        fields = "__all__"
+
+
+class PostWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        exclude = [
+            "date_created",
+            "date_modified",
+            "publish_date",
+            "published",
+        ]

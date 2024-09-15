@@ -1,5 +1,5 @@
 from account.controller import get_sentinel_user
-from account.models import UserProfile
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -50,7 +50,7 @@ class Post(models.Model):
     publish_date = models.DateTimeField(blank=True, null=True)
     published = models.BooleanField(default=False)
 
-    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="posts")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     tags = models.ManyToManyField(Tag, blank=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
 
@@ -62,7 +62,7 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     parent_comment = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
@@ -121,7 +121,7 @@ class Reaction(models.Model):
         (DISLIKE, DISLIKE),
     )
 
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="reactions")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reactions")
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     reaction_type = models.CharField(max_length=7, choices=REACTION_CHOICES, default=NEUTRAL)
 

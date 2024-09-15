@@ -17,7 +17,7 @@ from decouple import config
 from dotenv import load_dotenv
 
 # Reload environment variables on startup to avoid caching them.
-load_dotenv(dotenv_path="../.env.prod", verbose=True, override=True)
+load_dotenv(dotenv_path="../.env.dev", verbose=True, override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -100,10 +100,10 @@ DATABASES = {
     "default": {
         "ENGINE": config("DB_ENGINE", default="django.db.backends.sqlite3"),
         "NAME": config("DB_NAME", default=BASE_DIR / "db.sqlite3"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST"),
-        "PORT": config("DB_PORT"),
+        "USER": config("DB_USER", default=""),
+        "PASSWORD": config("DB_PASSWORD", default=""),
+        "HOST": config("DB_HOST", default=""),
+        "PORT": config("DB_PORT", default=""),
     }
 }
 
@@ -142,7 +142,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "django-static/"
+STATIC_URL = "static/"
 STATIC_ROOT = "/staticfiles/"
 
 # MEDIA_URL = "media/"
@@ -153,16 +153,10 @@ STATIC_ROOT = "/staticfiles/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "account.UserProfile"
-
 # Configure CORS to permit access from specific frontend server addresses.
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-]
-
-AUTHENTICATION_BACKENDS = [
-    "account.backends.EmailorUsernameBackend",
 ]
 
 
@@ -201,15 +195,6 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
-
 
 # Variables for verifying a new user's email address.
 VERIFICATION_EMAIL_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
@@ -236,8 +221,6 @@ CACHES = {
         },
     }
 }
-
-HOST = config("HOST", default="http://localhost:8000")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
