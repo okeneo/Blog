@@ -16,8 +16,8 @@ class Profile(models.Model):
         (READER, READER),
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.CharField(max_length=500, blank=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=READER)
+    bio = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
         return self.user.username

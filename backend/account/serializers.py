@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Profile
 
@@ -69,38 +68,29 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
-    bio = serializers.CharField(max_length=500, read_only=True)
     role = serializers.CharField(max_length=10, read_only=True)
+    bio = serializers.CharField(max_length=500, allow_blank=True)
 
     class Meta:
         model = Profile
         fields = [
             "username",
-            "bio",
             "role",
+            "bio",
         ]
 
     def get_username(self, obj):
         return obj.user.username
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-
-        # Conditionally remove the 'user' field when it's nested inside UserSerializer.
-        if "request" in self.context and isinstance(
-            self.context["request"].parser_context["view"], UserSerializer
-        ):
-            representation.pop("username", None)
-
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150)
-    email = serializers.EmailField()
-    first_name = serializers.CharField(max_length=150)
-    last_name = serializers.CharField(max_length=150)
+    email = serializers.EmailField(allow_blank=True)
+    first_name = serializers.CharField(max_length=150, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, allow_blank=True)
     password1 = serializers.CharField(style={"input_type": "password"}, write_only=True)
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
-    profile_data = ProfileSerializer()
+    profile = ProfileSerializer()
 
     class Meta:
         model = User
@@ -111,7 +101,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "password1",
             "password2",
-            "profile_data",
+            "profile",
         ]
 
     def validate_username(self, username):
@@ -145,9 +135,7 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def update(self, instance, validated_data):
-        profile_data = validated_data.pop("profile_data")
-        profile = instance.profile
-
+        # Update User data.
         instance.username = validated_data.get("username", instance.username)
         instance.email = validated_data.get("email", instance.email)
         instance.irst_name = validated_data.get("first_name", instance.first_name)
@@ -159,18 +147,11 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
 
-        profile_data.bio = profile_data.get("bio")
-        if profile_data.bio:
+        # Update Profile data.
+        profile_data = validated_data.pop("profile", None)
+        profile = instance.profile
+        if profile_data:
+            profile.bio = profile_data.get("bio", profile.bio)
             profile.save()
 
         return instance
-
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """A custom serializer that adds 'username' to the payload of a JWT token."""
-
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token["username"] = user.username
-        return token

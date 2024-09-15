@@ -7,16 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Profile
-from .permissions import IsAdmin, IsOwner, ReadOnly
-from .serializers import (
-    CustomTokenObtainPairSerializer,
-    ProfileSerializer,
-    UserRegisterSerializer,
-    UserSerializer,
-)
+from .permissions import IsAdmin, IsUser, ReadOnly
+from .serializers import ProfileSerializer, UserRegisterSerializer, UserSerializer
 
 
 class UserRegisterView(APIView):
@@ -55,7 +49,7 @@ class UserRegisterView(APIView):
 
 class UserView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (ReadOnly | (IsAuthenticated & (IsOwner | IsAdmin)),)
+    permission_classes = (ReadOnly | (IsAuthenticated & (IsUser | IsAdmin)),)
 
     @swagger_auto_schema(
         tags=["user"],
@@ -72,17 +66,18 @@ class UserView(APIView):
     )
     def get(self, request, username, *args, **kwargs):
         """Get a user's information."""
-        user = get_object_or_404(Profile, username=username)
+        user = get_object_or_404(User, username=username)
+        profile = user.profile
 
         if request.user.is_authenticated:
-            if request.user == user or request.user.role == Profile.ADMIN:
+            if request.user == user or request.user.profile.role == Profile.ADMIN:
                 serializer = UserSerializer(user)
             else:
                 # Use the public serializer for users that do not have the admin role.
-                serializer = ProfileSerializer(user)
+                serializer = ProfileSerializer(profile)
         else:
             # Use the public serializer for non-authenticated users.
-            serializer = ProfileSerializer(user)
+            serializer = ProfileSerializer(profile)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -104,6 +99,8 @@ class UserView(APIView):
     def put(self, request, username, *args, **kwargs):
         """Update a user's information."""
         user = get_object_or_404(User, username=username)
+        self.check_object_permissions(request, user)
+
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -127,11 +124,7 @@ class UserView(APIView):
     def delete(self, request, username, *args, **kwargs):
         """Delete a user."""
         user = get_object_or_404(User, username=username)
+        self.check_object_permissions(request, user)
+
         user.delete()
         return Response({"detail": "User deleted successfully."}, status=status.HTTP_200_OK)
-
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    """A custom view for user authentication using JWT."""
-
-    serializer_class = CustomTokenObtainPairSerializer

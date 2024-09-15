@@ -160,9 +160,8 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 
-# Settings to customize the behaviour of Simple JWT.
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -187,27 +186,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
-    "TOKEN_OBTAIN_SERIALIZER": "account.serializers.CustomTokenObtainPairSerializer",
-    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
-    "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
-    "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
-    "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
-    "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
-
-# Variables for verifying a new user's email address.
-VERIFICATION_EMAIL_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
-VERIFICATION_EMAIL_TOKEN_MAX_ATTEMPTS = 3
-
-# Variables for verifying a user's new email address.
-VERIFICATION_EMAIL_UPDATE_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
-
-# Variables allowing a user to reset their password.
-VERIFICATION_RESET_PASSWORD_TOKEN_EXPIRY_LIFE = 60 * 10  # 10 minutes.
-
-# Determines the period in which a user can verify their account during registration.
-MAX_TIME_TO_CONFIRM_EMAIL = 3 * 24 * 60 * 60  # 3 days.
 
 # Add username and password to Redis instance before deploying to production.
 CELERY_BROKER_URL = "redis://redis:6379/0"

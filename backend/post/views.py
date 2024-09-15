@@ -1,4 +1,4 @@
-from account.permissions import IsAdmin, IsAuthor, IsOwner, ReadOnly
+from account.permissions import IsAdmin, IsAuthor, IsOwnerOfObject, ReadOnly
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -46,7 +46,6 @@ class PostListView(APIView):
 
         The user must be authenticated and be an author.
         """
-        # TODO: They must be creating a post under their account.
         serializer = PostWriteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -56,7 +55,7 @@ class PostListView(APIView):
 
 class PostDetailView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (ReadOnly | (IsAuthenticated & (IsAdmin | (IsAuthor & IsOwner))),)
+    permission_classes = (ReadOnly | (IsAuthenticated & (IsAdmin | IsAuthor)),)
 
     @swagger_auto_schema(
         response={
@@ -85,6 +84,8 @@ class PostDetailView(APIView):
         The user must be authenticated and must be an admin or the author of the post.
         """
         post = get_object_or_404(Post, pk=pk)
+        self.check_object_permissions(request, post)
+
         serializer = PostWriteSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -104,13 +105,15 @@ class PostDetailView(APIView):
         The user must be authenticated and must be an admin or the author of the post.
         """
         post = get_object_or_404(Post, pk=pk)
+        self.check_object_permissions(request, post)
+
         post.delete()
         return Response({"detail": "Post deleted successfully."}, status=status.HTTP_200_OK)
 
 
 class PublishPostView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated & (IsAdmin | (IsAuthor & IsOwner)),)
+    permission_classes = (IsAuthenticated & (IsAdmin | IsAuthor),)
 
     @swagger_auto_schema(
         responses={
@@ -123,6 +126,8 @@ class PublishPostView(APIView):
     def post(self, request, pk, *args, **kwargs):
         """Publish an existing post."""
         post = get_object_or_404(Post, pk=pk)
+        self.check_object_permissions(request, post)
+
         if not post.published:
             post.published = True
             post.publish_date = timezone.now()
@@ -159,7 +164,7 @@ class PostCommentsView(APIView):
 
 class CommentDetailView(APIView):
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (ReadOnly | (IsAuthenticated & IsOwner),)
+    permission_classes = (ReadOnly | (IsAuthenticated & IsOwnerOfObject),)
 
     def get(self, request, pk, *args, **kwargs):
         pass
@@ -177,6 +182,7 @@ class CommentDetailView(APIView):
     def delete(self, request, pk, *args, **kwargs):
         """Delete a comment."""
         comment = get_object_or_404(Comment, pk=pk)
+        self.check_object_permissions(request, comment)
 
         if comment.replies.exist():
             comment.soft_delete()
