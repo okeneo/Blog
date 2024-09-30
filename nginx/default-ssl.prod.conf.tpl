@@ -62,7 +62,7 @@ server {
         proxy_set_header X-Url-Scheme $scheme;
     }
 
-    location /django-static/ {
+    location /static/ {
         alias /staticfiles/;
     }
 }
