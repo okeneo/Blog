@@ -21,7 +21,7 @@ DEV_ENV_PATH = "../.env.dev"
 PROD_ENV_PATH = "../.env.prod"
 
 # Reload environment variables on startup to avoid caching them.
-if os.path.exists():
+if os.path.exists(DEV_ENV_PATH):
     load_dotenv(dotenv_path=DEV_ENV_PATH, verbose=True, override=True)
 else:
     load_dotenv(dotenv_path=PROD_ENV_PATH, verbose=True, override=True)
