@@ -10,14 +10,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
 
 from decouple import config
 from dotenv import load_dotenv
 
+DEV_ENV_PATH = "../.env.dev"
+PROD_ENV_PATH = "../.env.prod"
+
 # Reload environment variables on startup to avoid caching them.
-load_dotenv(dotenv_path="../.env.dev", verbose=True, override=True)
+if os.path.exists():
+    load_dotenv(dotenv_path=DEV_ENV_PATH, verbose=True, override=True)
+else:
+    load_dotenv(dotenv_path=PROD_ENV_PATH, verbose=True, override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
