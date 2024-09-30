@@ -52,12 +52,10 @@ services:
     env_file: .env.prod
     volumes:
       - staticfiles:/staticfiles
-      - frontend_build:/var/www/frontend
       - certbot_certs:/etc/letsencrypt
       - certbot_web:/var/www/certbot
     depends_on:
       - api
-      - frontend
 
   certbot:
     build:
@@ -71,18 +69,8 @@ services:
     depends_on:
       - nginx
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    command: echo "Skipping frontend..."
-    image: personalnest-frontend:1.0
-    volumes:
-      - frontend_build:/frontend/build
-
 volumes:
   staticfiles:
-  frontend_build:
   postgres_data:
   certbot_certs:
   certbot_web:

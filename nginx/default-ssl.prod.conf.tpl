@@ -46,8 +46,7 @@ server {
     client_max_body_size 10M;
 
     location / {
-        alias /var/www/frontend/;
-        try_files $uri $uri/ /index.html;
+        return 301 /api/swagger;
     }
 
     location /api {
