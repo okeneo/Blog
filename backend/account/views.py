@@ -65,7 +65,10 @@ class UserView(APIView):
         },
     )
     def get(self, request, username, *args, **kwargs):
-        """Get a user's information."""
+        """Get a user's data.
+
+        Authenticated users will see more data, with the caveat that they need to be an
+        admin or the owner of the account."""
         user = get_object_or_404(User, username=username)
         profile = user.profile
 
@@ -97,7 +100,10 @@ class UserView(APIView):
         },
     )
     def put(self, request, username, *args, **kwargs):
-        """Update a user's information."""
+        """Update a user's information.
+
+        The user must be authenticated and must be an admin or the owner of the account.
+        """
         user = get_object_or_404(User, username=username)
         self.check_object_permissions(request, user)
 
@@ -122,7 +128,10 @@ class UserView(APIView):
         },
     )
     def delete(self, request, username, *args, **kwargs):
-        """Delete a user."""
+        """Delete a user.
+
+        The user must be authenticated and must be an admin or the owner of the account.
+        """
         user = get_object_or_404(User, username=username)
         self.check_object_permissions(request, user)
 

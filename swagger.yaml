@@ -1,17 +1,17 @@
 swagger: '2.0'
 info:
-  title: Personal Website API
-  description: API Documentation for my personal website.
+  title: Blog API
+  description: API Documentation for a Blog API
   termsOfService: https://github.com/okeneo/PersonalNest/blob/main/LICENSE
   contact:
     name: okenetega@gmail.com
   license:
     name: MIT License
   version: v1
-host: localhost:8000
+host: 127.0.0.1:8000
 schemes:
 - http
-basePath: /api/blog
+basePath: /api
 consumes:
 - application/json
 produces:
@@ -22,119 +22,78 @@ securityDefinitions:
 security:
 - Basic: []
 paths:
-  /account/{username}/:
+  /categories/:
     get:
-      operationId: account_read
-      description: |-
-        Get the data of a given user.
-        Only users with the admin role are able to view the data available from this endpoint.
-      parameters:
-      - name: username
-        in: path
-        description: Username
-        type: string
-        required: true
+      operationId: categories_list
+      description: Get all categories.
+      parameters: []
       responses:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/Account'
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+      tags:
+      - category
+    post:
+      operationId: categories_create
+      summary: Create a new Category.
+      description: The user must be authenticated and must be an admin.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Category'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Category'
         '400':
           description: Bad Request
-        '401':
-          description: Unauthorized Request
-        '404':
-          description: User Not Found
       tags:
-      - account
-    delete:
-      operationId: account_delete
-      description: Delete a user.
-      parameters:
-      - name: username
-        in: path
-        description: Username
-        type: string
-        required: true
+      - category
+    parameters: []
+  /categories/{id}/:
+    get:
+      operationId: categories_read
+      description: Get a category.
+      parameters: []
       responses:
         '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized Request
-        '404':
-          description: User Not Found
+          description: ''
       tags:
-      - account
+      - category
+    put:
+      operationId: categories_update
+      summary: Update a category.
+      description: The user must be authenticated and must be an admin.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - category
+    delete:
+      operationId: categories_delete
+      summary: Delete a category.
+      description: The user must be authenticated and must be an admin.
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - category
     parameters:
-    - name: username
+    - name: id
       in: path
       required: true
       type: string
-  /password-change/:
-    post:
-      operationId: password-change_create
-      description: Change the password on an account.
-      parameters:
-      - name: data
-        in: body
-        required: true
-        schema:
-          required:
-          - old_password
-          - new_password1
-          - new_password2
-          type: object
-          properties:
-            old_password:
-              type: string
-            new_password1:
-              type: string
-            new_password2:
-              type: string
-      responses:
-        '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized Request
-      tags:
-      - password
-    parameters: []
-  /password-reset/:
-    post:
-      operationId: password-reset_create
-      description: |-
-        Reset the password on a user's account. This represents the 'forgot password'
-        functionality.
-      parameters:
-      - name: data
-        in: body
-        required: true
-        schema:
-          required:
-          - email
-          type: object
-          properties:
-            email:
-              type: string
-      responses:
-        '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized Request
-        '404':
-          description: User Not Found
-      tags:
-      - password
-    parameters: []
-  /post/:
+  /posts/:
     get:
-      operationId: post_list
+      operationId: posts_list
       description: Get all posts.
       parameters: []
       responses:
@@ -147,9 +106,9 @@ paths:
       tags:
       - post
     post:
-      operationId: post_create
+      operationId: posts_create
       summary: Create a new post.
-      description: The user must be logged in (authenticated) and be an author.
+      description: The user must be authenticated and be an author.
       parameters:
       - name: data
         in: body
@@ -168,40 +127,10 @@ paths:
       tags:
       - post
     parameters: []
-  /post/categories/:
+  /posts/{id}/:
     get:
-      operationId: post_categories_list
-      description: List all categories.
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Category'
-      tags:
-      - post
-    parameters: []
-  /post/tags/:
-    get:
-      operationId: post_tags_list
-      description: List all tags.
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Tag'
-      tags:
-      - post
-    parameters: []
-  /post/{id}/:
-    get:
-      operationId: post_read
-      description: Get a post.
+      operationId: posts_read
+      description: Get a specific post.
       parameters: []
       responses:
         '200':
@@ -209,10 +138,10 @@ paths:
       tags:
       - post
     put:
-      operationId: post_update
+      operationId: posts_update
       summary: Update a post.
-      description: The user must be logged in (authenticated) and must be an admin
-        or the author of the post.
+      description: The user must be authenticated and must be an admin or the author
+        of the post.
       parameters: []
       responses:
         '200':
@@ -220,10 +149,10 @@ paths:
       tags:
       - post
     delete:
-      operationId: post_delete
+      operationId: posts_delete
       summary: Delete a post.
-      description: The user must be logged in (authenticated) and must be an admin
-        or the author of the post.
+      description: The user must be authenticated and must be an admin or the author
+        of the post.
       parameters: []
       responses:
         '204':
@@ -235,9 +164,9 @@ paths:
       in: path
       required: true
       type: string
-  /post/{id}/comments/:
+  /posts/{id}/comments/:
     get:
-      operationId: post_comments_list
+      operationId: posts_comments_list
       description: Get all comments under a post.
       parameters: []
       responses:
@@ -248,25 +177,32 @@ paths:
             items:
               $ref: '#/definitions/CommentTree'
       tags:
-      - post
+      - comment
     post:
-      operationId: post_comments_create
-      description: ''
+      operationId: posts_comments_create
+      summary: Create a new comment under a post.
+      description: The user must be authenticated.
       parameters: []
       responses:
         '201':
           description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CommentTree'
       tags:
-      - post
+      - comment
     parameters:
     - name: id
       in: path
       required: true
       type: string
-  /post/{id}/publish/:
+  /posts/{id}/publish/:
     post:
-      operationId: post_publish_create
-      description: Publish an existing post.
+      operationId: posts_publish_create
+      summary: Publish an existing post.
+      description: The user must be authenticated and must be an admin or the author
+        of the post.
       parameters: []
       responses:
         '200':
@@ -284,81 +220,92 @@ paths:
       in: path
       required: true
       type: string
-  /register/:
-    post:
-      operationId: register_create
-      summary: Create a new user and send them a verification email.
-      description: |-
-        is_active and is_email_verified are initially set to false to indicate incomplete
-        registration.
-      parameters:
-      - name: data
-        in: body
-        required: true
-        schema:
-          required:
-          - username
-          - email
-          - password1
-          - password2
-          type: object
-          properties:
-            username:
-              type: string
-            email:
-              type: string
-            password1:
-              type: string
-            password2:
-              type: string
-      responses:
-        '201':
-          description: Created
-        '400':
-          description: Bad Request
-      tags:
-      - register
-    parameters: []
-  /resend-verification-email/:
-    post:
-      operationId: resend-verification-email_create
-      description: |-
-        Resend an email for a user to verify the email address on their newly created
-        account.
-      parameters:
-      - name: data
-        in: body
-        required: true
-        schema:
-          required:
-          - email
-          type: object
-          properties:
-            email:
-              type: string
+  /tags/:
+    get:
+      operationId: tags_list
+      description: Get all tags.
+      parameters: []
       responses:
         '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tag'
       tags:
-      - register
-    parameters: []
-  /token/:
+      - tag
     post:
-      operationId: token_create
-      description: A custom view for user authentication using JWT.
+      operationId: tags_create
+      summary: Create a new tag.
+      description: The user must be authenticated and must be an admin.
       parameters:
       - name: data
         in: body
         required: true
         schema:
-          $ref: '#/definitions/CustomTokenObtainPair'
+          $ref: '#/definitions/Tag'
       responses:
         '201':
           description: ''
           schema:
-            $ref: '#/definitions/CustomTokenObtainPair'
+            $ref: '#/definitions/Tag'
+        '400':
+          description: Bad Request
+      tags:
+      - tag
+    parameters: []
+  /tags/{id}/:
+    get:
+      operationId: tags_read
+      description: Get a tag.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - tag
+    put:
+      operationId: tags_update
+      summary: Update a tag.
+      description: The user must be authenticated and must be an admin.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - tag
+    delete:
+      operationId: tags_delete
+      summary: Delete a tag.
+      description: The user must be authenticated and must be an admin.
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - tag
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/TokenObtainPair'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TokenObtainPair'
       tags:
       - token
     parameters: []
@@ -402,39 +349,42 @@ paths:
       tags:
       - token
     parameters: []
-  /update-email/:
+  /users/register/:
     post:
-      operationId: update-email_create
-      description: Update a user's email address by sending a verification link to
-        their new email.
+      operationId: users_register_create
+      description: Create a new user.
       parameters:
       - name: data
         in: body
         required: true
         schema:
           required:
-          - new_email
+          - username
+          - password1
+          - password2
           type: object
           properties:
-            new_email:
+            username:
+              type: string
+            password1:
+              type: string
+            password2:
               type: string
       responses:
-        '200':
-          description: Successful Response
+        '201':
+          description: Created
         '400':
           description: Bad Request
-        '401':
-          description: Unauthorized Request
       tags:
-      - update-email
+      - user
     parameters: []
-  /user/{username}/:
+  /users/{username}/:
     get:
-      operationId: user_read
-      summary: Get a user's profile data.
+      operationId: users_read
+      summary: Get a user's data.
       description: |-
-        In order to view more data, the user must be logged in (authenticated) and must either
-        be the owner of the account, or have the admin role.
+        Authenticated users will see more data, with the caveat that they need to be an
+        admin or the owner of the account.
       parameters:
       - name: username
         in: path
@@ -445,7 +395,7 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/UserProfilePublic'
+            $ref: '#/definitions/Profile'
         '400':
           description: Bad Request
         '404':
@@ -453,15 +403,16 @@ paths:
       tags:
       - user
     put:
-      operationId: user_update
-      summary: Update a user's profile information.
-      description: The email address and role cannot be updated with this view.
+      operationId: users_update
+      summary: Update a user's information.
+      description: The user must be authenticated and must be an admin or the owner
+        of the account.
       parameters:
       - name: data
         in: body
         required: true
         schema:
-          $ref: '#/definitions/UserProfilePrivate'
+          $ref: '#/definitions/User'
       - name: username
         in: path
         description: Username
@@ -471,7 +422,29 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/UserProfilePrivate'
+            $ref: '#/definitions/User'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized Request
+        '404':
+          description: User Not Found
+      tags:
+      - user
+    delete:
+      operationId: users_delete
+      summary: Delete a user.
+      description: The user must be authenticated and must be an admin or the owner
+        of the account.
+      parameters:
+      - name: username
+        in: path
+        description: Username
+        type: string
+        required: true
+      responses:
+        '200':
+          description: Successful Response
         '400':
           description: Bad Request
         '401':
@@ -485,176 +458,7 @@ paths:
       in: path
       required: true
       type: string
-  /verify-email-update/:
-    post:
-      operationId: verify-email-update_create
-      description: Check the validity of the verification token to update a user's
-        new email address.
-      parameters:
-      - name: token_key
-        in: query
-        description: Token Key
-        type: string
-      responses:
-        '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
-      tags:
-      - update-email
-    parameters: []
-  /verify-email/:
-    post:
-      operationId: verify-email_create
-      description: Check the validity of the verification token to complete a new
-        user's registration.
-      parameters:
-      - name: token_key
-        in: query
-        description: Token Key
-        type: string
-      responses:
-        '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
-      tags:
-      - register
-    parameters: []
-  /verify-password-reset/:
-    post:
-      operationId: verify-password-reset_create
-      description: Check the validity of the verification token to allow a user to
-        reset their password.
-      parameters:
-      - name: data
-        in: body
-        required: true
-        schema:
-          required:
-          - new_password1
-          - new_password2
-          type: object
-          properties:
-            new_password1:
-              type: string
-            new_password2:
-              type: string
-      - name: token_key
-        in: query
-        description: Token Key
-        type: string
-      responses:
-        '200':
-          description: Successful Response
-        '400':
-          description: Bad Request
-      tags:
-      - password
-    parameters: []
 definitions:
-  Account:
-    required:
-    - username
-    - email
-    type: object
-    properties:
-      id:
-        title: ID
-        type: integer
-        readOnly: true
-      last_login:
-        title: Last login
-        type: string
-        format: date-time
-        x-nullable: true
-      is_superuser:
-        title: Superuser status
-        description: Designates that this user has all permissions without explicitly
-          assigning them.
-        type: boolean
-      username:
-        title: Username
-        description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-          only.
-        type: string
-        pattern: ^[\w.@+-]+$
-        maxLength: 150
-        minLength: 1
-      first_name:
-        title: First name
-        type: string
-        maxLength: 150
-      last_name:
-        title: Last name
-        type: string
-        maxLength: 150
-      is_staff:
-        title: Staff status
-        description: Designates whether the user can log into this admin site.
-        type: boolean
-      is_active:
-        title: Active
-        description: Designates whether this user should be treated as active. Unselect
-          this instead of deleting accounts.
-        type: boolean
-      date_joined:
-        title: Date joined
-        type: string
-        format: date-time
-      role:
-        title: Role
-        type: string
-        enum:
-        - AUTHOR
-        - ADMIN
-        - READER
-      bio:
-        title: Bio
-        type: string
-        maxLength: 255
-      email:
-        title: Email address
-        type: string
-        format: email
-        maxLength: 255
-        minLength: 1
-      is_email_verified:
-        title: Is email verified
-        type: boolean
-      groups:
-        description: The groups this user belongs to. A user will get all permissions
-          granted to each of their groups.
-        type: array
-        items:
-          description: The groups this user belongs to. A user will get all permissions
-            granted to each of their groups.
-          type: integer
-        uniqueItems: true
-      user_permissions:
-        description: Specific permissions for this user.
-        type: array
-        items:
-          description: Specific permissions for this user.
-          type: integer
-        uniqueItems: true
-  UserProfilePublic:
-    required:
-    - username
-    type: object
-    properties:
-      username:
-        title: Username
-        description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-          only.
-        type: string
-        pattern: ^[\w.@+-]+$
-        maxLength: 150
-        minLength: 1
-      bio:
-        title: Bio
-        type: string
-        maxLength: 255
   Category:
     required:
     - name
@@ -667,9 +471,27 @@ definitions:
       name:
         title: Name
         type: string
-        enum:
-        - Technology
-        - Life
+        maxLength: 20
+        minLength: 1
+  Profile:
+    required:
+    - bio
+    type: object
+    properties:
+      username:
+        title: Username
+        type: string
+        readOnly: true
+      role:
+        title: Role
+        type: string
+        readOnly: true
+        maxLength: 10
+        minLength: 1
+      bio:
+        title: Bio
+        type: string
+        maxLength: 500
   Tag:
     required:
     - name
@@ -682,10 +504,8 @@ definitions:
       name:
         title: Name
         type: string
-        enum:
-        - Software Engineering
-        - Django
-        - Grit
+        maxLength: 20
+        minLength: 1
   PostDetail:
     required:
     - author
@@ -700,7 +520,7 @@ definitions:
         type: integer
         readOnly: true
       author:
-        $ref: '#/definitions/UserProfilePublic'
+        $ref: '#/definitions/Profile'
       category:
         $ref: '#/definitions/Category'
       tags:
@@ -716,20 +536,10 @@ definitions:
         title: Subtitle
         type: string
         maxLength: 255
-      slug:
-        title: Slug
-        type: string
-        format: slug
-        pattern: ^[-a-zA-Z0-9_]+$
-        maxLength: 255
       body:
         title: Body
         type: string
         minLength: 1
-      meta_description:
-        title: Meta description
-        type: string
-        maxLength: 150
       date_created:
         title: Date created
         type: string
@@ -769,20 +579,10 @@ definitions:
         title: Subtitle
         type: string
         maxLength: 255
-      slug:
-        title: Slug
-        type: string
-        format: slug
-        pattern: ^[-a-zA-Z0-9_]+$
-        maxLength: 255
       body:
         title: Body
         type: string
         minLength: 1
-      meta_description:
-        title: Meta description
-        type: string
-        maxLength: 150
       author:
         title: Author
         type: integer
@@ -823,9 +623,6 @@ definitions:
         type: string
         format: date-time
         readOnly: true
-      is_deleted:
-        title: Is deleted
-        type: boolean
       user:
         title: User
         type: integer
@@ -836,7 +633,7 @@ definitions:
         title: Parent comment
         type: integer
         x-nullable: true
-  CustomTokenObtainPair:
+  TokenObtainPair:
     required:
     - username
     - password
@@ -873,12 +670,15 @@ definitions:
         type: string
         readOnly: true
         minLength: 1
-  UserProfilePrivate:
+  User:
     required:
     - username
-    - bio
+    - email
     - first_name
     - last_name
+    - password1
+    - password2
+    - profile
     type: object
     properties:
       username:
@@ -890,12 +690,6 @@ definitions:
         title: Email
         type: string
         format: email
-        readOnly: true
-        minLength: 1
-      bio:
-        title: Bio
-        type: string
-        maxLength: 255
       first_name:
         title: First name
         type: string
@@ -904,8 +698,13 @@ definitions:
         title: Last name
         type: string
         maxLength: 150
-      role:
-        title: Role
+      password1:
+        title: Password1
         type: string
-        readOnly: true
         minLength: 1
+      password2:
+        title: Password2
+        type: string
+        minLength: 1
+      profile:
+        $ref: '#/definitions/Profile'

@@ -5,7 +5,7 @@ from django.dispatch import receiver
 
 
 class Profile(models.Model):
-    """This relates to the User model and includes additional information about the user."""
+    """This relates to the `User` model and includes additional information about the user."""
 
     AUTHOR = "AUTHOR"
     ADMIN = "ADMIN"

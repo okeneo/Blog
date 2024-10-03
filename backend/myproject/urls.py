@@ -19,13 +19,15 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from post.views import CategoryDetailView, CategoryListView, TagDetailView, TagListView
 from rest_framework import permissions
+from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView, TokenRefreshView
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Personal Website API",
+        title="Blog API",
         default_version="v1",
-        description="API Documentation for my personal website.",
+        description="API Documentation for a Blog API",
         terms_of_service="https://github.com/okeneo/PersonalNest/blob/main/LICENSE",
         contact=openapi.Contact("okenetega@gmail.com"),
         license=openapi.License("MIT License"),
@@ -37,7 +39,15 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("api/admin/", admin.site.urls),
-    path("api/blog/", include("blog.urls")),
+    path("api/users/", include("account.urls")),
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/token/blacklist/", TokenBlacklistView.as_view(), name="token_blacklist"),
+    path("api/posts/", include("post.urls")),
+    path("api/categories/", CategoryListView.as_view(), name="category_list"),
+    path("api/categories/<int:pk>/", CategoryDetailView.as_view(), name="category_detail"),
+    path("api/tags/", TagListView.as_view(), name="tag_list"),
+    path("api/tags/<int:pk>/", TagDetailView.as_view(), name="tag_detail"),
     re_path(
         r"^api/swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
