@@ -13,19 +13,6 @@ services:
     depends_on:
       - postgres-db
 
-  celery:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    image: personalnest-celery:1.0
-    entrypoint: ./entrypoint-celery.sh
-    environment:
-      - CELERY_BROKER=redis://redis:6379/0
-    env_file: .env.prod
-    depends_on:
-      - api
-      - redis
-
   redis:
     image: redis:7.2.4-alpine
     command: redis-server

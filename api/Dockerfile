@@ -16,7 +16,6 @@ RUN pip install -r requirements.txt
 COPY . /api
 
 RUN chmod +x ./entrypoint-api.sh
-RUN chmod +x ./entrypoint-celery.sh
 
 RUN chown -R myuser:myuser /api
 
