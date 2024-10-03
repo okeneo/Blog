@@ -7,11 +7,14 @@ This website serves as a portfolio and place to showcase my projects, skills, an
 
 ## Table of Contents
 
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Contact](#contact)
+- [Personal Website](#personal-website)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Technologies Used](#technologies-used)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+    - [API Setup](#api-setup)
+  - [Contact](#contact)
 
 ## Features
 
@@ -22,13 +25,11 @@ This website serves as a portfolio and place to showcase my projects, skills, an
 
 ## Technologies Used
 
-- Django
-- React
+- Django and Django REST framework
 - Docker
 - AWS
 - Nginx
-- Django REST framework
-- Redis + Celery
+- Redis
 - JSON Web Token (JWT)
 - PostgreSQL
 
@@ -44,7 +45,7 @@ This website serves as a portfolio and place to showcase my projects, skills, an
    git clone https://github.com/okeneo/PersonalNest.git
    ```
 
-### Backend Setup
+### API Setup
 
 1. Navigate to the project directory:
 
@@ -61,7 +62,7 @@ This website serves as a portfolio and place to showcase my projects, skills, an
 3. Install Dependencies:
 
     ```bash
-    cd backend
+    cd api
     python -m pip install -r requirements.txt
     ```
 
@@ -76,8 +77,6 @@ This website serves as a portfolio and place to showcase my projects, skills, an
     ```
     Set DEBUG=True in settings.py if necessary
     ```
-
-### Frontend Setup
 
 ## Contact
 - Email: okenetega@gmail.com
