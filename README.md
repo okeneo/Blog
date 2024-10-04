@@ -61,7 +61,7 @@ POSTGRES_DB="yourdb"
 
 ## Setup
 
-This project is designed to run with Docker. However, you can also run the Django application independently (using the [Setup Django](#setup-django) instructions), which is often convenient during development. This means, however, that Nginx will no longer serve as a revere proxy, and Redis will need to be started manually. Additionally, in a production environment, you will no longer have Certbot for HTTPS. It is also important to know that the Django (development) server is not even designed for use in a production environment, as seen [here](https://docs.djangoproject.com/en/5.1/ref/django-admin/#runserver).
+This project is designed to run with Docker. However, you can also run the Django application independently (using the [Setup Django](#setup-django) instructions), which is often convenient during development. This means, however, that Nginx will no longer serve as a revere proxy, and Redis will need to be started manually. Additionally, in a production environment, you will no longer have Certbot for HTTPS. It is also important to know that the Django (development) server is not designed for use in a production environment, as seen [here](https://docs.djangoproject.com/en/5.1/ref/django-admin/#runserver).
 
 
 ## Setup (Docker)
