@@ -28,7 +28,7 @@ schema_view = get_schema_view(
         title="Blog API",
         default_version="v1",
         description="API Documentation for a Blog API",
-        terms_of_service="https://github.com/okeneo/PersonalNest/blob/main/LICENSE",
+        terms_of_service="https://github.com/okeneo/BlogAPI/blob/main/LICENSE",
         contact=openapi.Contact("okenetega@gmail.com"),
         license=openapi.License("MIT License"),
     ),

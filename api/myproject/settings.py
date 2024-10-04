@@ -17,17 +17,17 @@ from pathlib import Path
 from decouple import config
 from dotenv import load_dotenv
 
-DEV_ENV_PATH = "../.env.dev"
-PROD_ENV_PATH = "../.env.prod"
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+DEV_ENV_PATH = BASE_DIR / "../.env.dev"
+PROD_ENV_PATH = BASE_DIR / "../.env.prod"
 
 # Reload environment variables on startup to avoid caching them.
 if os.path.exists(DEV_ENV_PATH):
     load_dotenv(dotenv_path=DEV_ENV_PATH, verbose=True, override=True)
 else:
     load_dotenv(dotenv_path=PROD_ENV_PATH, verbose=True, override=True)
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production

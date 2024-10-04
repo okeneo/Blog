@@ -3,7 +3,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    image: personalnest-api:1.0
+    image: blogapi-api:1.0
     expose:
       - "8000"
     entrypoint: ./entrypoint-api.sh

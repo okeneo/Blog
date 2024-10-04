@@ -2,13 +2,13 @@ swagger: '2.0'
 info:
   title: Blog API
   description: API Documentation for a Blog API
-  termsOfService: https://github.com/okeneo/PersonalNest/blob/main/LICENSE
+  termsOfService: https://github.com/okeneo/BlogAPI/blob/main/LICENSE
   contact:
     name: okenetega@gmail.com
   license:
     name: MIT License
   version: v1
-host: 127.0.0.1:8000
+host: localhost:8000
 schemes:
 - http
 basePath: /api

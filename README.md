@@ -1,83 +1,136 @@
-# Personal Website
+# Blog API
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/okeneo/PersonalNest/blob/main/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/okeneo/PersonalNest.svg)](https://github.com/okeneo/PersonalNest/issues)
+> This is a Blog REST API built using Django and the Django REST framework. It is hosted on an AWS EC2 instance but I do not keep it available all the time due to the limitations of the AWS free-tier plan. When it is available, it can be accessed [here](https://tegaokene.com/api/swagger).
 
-This website serves as a portfolio and place to showcase my projects, skills, and experiences. It also includes a blog section.
-
-## Table of Contents
-
-- [Personal Website](#personal-website)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Technologies Used](#technologies-used)
-  - [Requirements](#requirements)
-  - [Installation](#installation)
-    - [API Setup](#api-setup)
-  - [Contact](#contact)
 
 ## Features
 
-- [Swagger Docs](https://okeneo.github.io/PersonalNest/) API documentation.
-- Blog section for tutorials and sharing my thoughts.
-  - Includes signup and login with JWT authentication.
-- Comprehensive unit tests.
+- **[Swagger Docs](https://okeneo.github.io/BlogAPI/) API documentation**
+- JSON Web Token (JWT) for authentication
+- Comprehensive unit tests
+
 
 ## Technologies Used
 
-- Django and Django REST framework
+- Django and Django REST framework (DRF)
 - Docker
-- AWS
+- AWS (EC2, RDS, Route53)
 - Nginx
 - Redis
 - JSON Web Token (JWT)
 - PostgreSQL
+- Certbot for HTTPS
+
 
 ## Requirements
-- Python 3.11.8
-- Docker 24.0.7
+- Python 3.11.8 or higher
+- Docker 24.0.7 or later
+- A `.env.dev` or `.env.prod` file located in the root directory
 
-## Installation
+
+## Environment Variable Template
+
+```
+# Django
+SECRET_KEY="your-default-secret-key"
+DJANGO_ALLOWED_HOSTS="127.0.0.1 localhost"
+DEBUG=1 # For development ONLY
+
+# Django DB settings
+DB_ENGINE="django.db.backends.postgresql"
+DB_NAME="yourdb"
+DB_USER="youruser"
+DB_PASSWORD="yourpassword"
+DB_HOST="db"
+DB_PORT="5432"
+
+# PostgreSQL on Docker
+POSTGRES_USER="youruser"
+POSTGRES_PASSWORD="yourpassword"
+POSTGRES_DB="yourdb"
+```
+
+## Setup
+
+This project is designed to run with Docker. However, you can also run the Django application independently (using the [Setup Django](#setup-django) instructions), which is often convenient during development. This means, however, that Nginx will no longer serve as a revere proxy, and Redis will need to be started manually. Additionally, in a production environment, you will no longer have Certbot for HTTPS. It is also important to know that the Django (development) server is not even designed for use in a production environment, as seen [here](https://docs.djangoproject.com/en/5.1/ref/django-admin/#runserver).
+
+
+## Setup (Docker)
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/okeneo/PersonalNest.git
+   git clone https://github.com/okeneo/BlogAPI.git
    ```
 
-### API Setup
+2. Build the Docker images:
 
-1. Navigate to the project directory:
+   ```bash
+   docker-compose -f docker-compose.dev.yml build
+   ```
+
+3. Start the containers:
+
+   ```bash
+   docker-compose -f docker-compose.dev.yml up
+   ```
+
+## Setup (Django)
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/okeneo/BlogAPI.git
+   ```
+
+2. Navigate to the project directory:
 
     ```bash
-    cd PersonalNest
+    cd BlogAPI
     ```
-2. Create, then activate a Virtual Environment (Optional):
+
+3. Create, then activate a virtual environment (Recommended):
 
     ```bash
     python -m venv .venv
     source .venv/bin/activate
     ```
 
-3. Install Dependencies:
+4. Install dependencies:
 
     ```bash
     cd api
     python -m pip install -r requirements.txt
     ```
 
-4. Apply Migrations
+5. Apply migrations
 
     ```bash
     python manage.py migrate
     ```
 
-5. Extra Setup:
+6. Start the server:
 
+    ```bash
+    python manage.py runserver
     ```
-    Set DEBUG=True in settings.py if necessary
+
+## Running tests
+
+1. Navigate to the api directory:
+
+    ```bash
+    cd BlogAPI
+    cd api
     ```
+
+2. Run unit test Django command:
+
+    ```bash
+    python manage.py test
+    ```
+
 
 ## Contact
-- Email: okenetega@gmail.com
-- LinkedIn: https://www.linkedin.com/in/tega-okene/
+- [Email](okenetega@gmail.com)
+- [LinkedIn](https://www.linkedin.com/in/tega-okene/)
