@@ -7,7 +7,16 @@
 
 - **[Swagger Docs](https://okeneo.github.io/BlogAPI/) API documentation**
 - JSON Web Token (JWT) for authentication
+- Nginx as a reverse proxy
+- Redis for caching
+- Throttling to prevent abuse
+- Free SSL certificates using Certbot (for HTTPS)
 - Comprehensive unit tests
+
+
+## API Documentation
+
+A sample of the static API documentation is hosted on [GitHub Pages](https://okeneo.github.io/BlogAPI/). When the production API is live, the documentation can be found [here](https://tegaokene.com/api/swagger) and you can interact with it like any other API.
 
 
 ## Technologies Used
@@ -73,6 +82,12 @@ This project is designed to run with Docker. However, you can also run the Djang
 
    ```bash
    docker-compose -f docker-compose.dev.yml up
+   ```
+
+4. In a separate terminal, run the following command to collect static files for Django to serve:
+
+   ```bash
+   docker exec -it blogapi-api-1 python manage.py collectstatic --no-input
    ```
 
 ## Setup (Django)
