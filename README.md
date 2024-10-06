@@ -147,5 +147,5 @@ This project is designed to run with Docker. However, you can also run the Djang
 
 
 ## Contact
-- [Email](okenetega@gmail.com)
+- [Email](mailto:okenetega@gmail.com)
 - [LinkedIn](https://www.linkedin.com/in/tega-okene/)
