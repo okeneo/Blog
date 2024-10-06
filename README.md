@@ -1,6 +1,6 @@
 # Blog API
 
-> This is a Blog REST API built using Django and the Django REST framework. It is hosted on an AWS EC2 instance but I do not keep it available all the time due to the limitations of the AWS free-tier plan. When it is available, it can be accessed [here](https://tegaokene.com/api/swagger).
+> This is a Blog REST API built using Django and the Django REST framework. It is hosted on an AWS EC2 instance and can be accessed [here](https://tegaokene.com/api/swagger). I do not keep it available at all times, however, due to the limitations of the AWS free-tier plan.
 
 
 ## Features
@@ -61,7 +61,7 @@ POSTGRES_DB="yourdb"
 
 ## Setup
 
-This project is designed to run with Docker. However, you can also run the Django application independently (using the [Setup Django](#setup-django) instructions), which is often convenient during development. This means, however, that Nginx will no longer serve as a revere proxy, and Redis will need to be started manually. Additionally, in a production environment, you will no longer have Certbot for HTTPS. It is also important to know that the Django (development) server is not even designed for use in a production environment, as seen [here](https://docs.djangoproject.com/en/5.1/ref/django-admin/#runserver).
+This project is designed to run with Docker. However, you can also run the Django application independently (using the [Setup Django](#setup-django) instructions), which is often convenient during development. This means, however, that Nginx will no longer serve as a revere proxy, and Redis will need to be started manually. Additionally, in a production environment, you will no longer have Certbot for HTTPS. It is also important to know that the Django (development) server is not even designed for use in a production environment, as stated [here](https://docs.djangoproject.com/en/5.1/ref/django-admin/#runserver).
 
 
 ## Setup (Docker)
@@ -132,7 +132,7 @@ This project is designed to run with Docker. However, you can also run the Djang
 
 ## Running tests
 
-1. Navigate to the api directory:
+1. Navigate to the `api` directory:
 
     ```bash
     cd BlogAPI
