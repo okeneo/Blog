@@ -37,7 +37,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             return username
 
     def validate_password1(self, password1):
-        print("Testing order of execution: validate_password1()")
         try:
             # Validate the password using Django's built-in password validator.
             validate_password(password1)
@@ -46,7 +45,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return password1
 
     def validate(self, data):
-        print("Testing order of execution: validate()")
         password1 = data.get("password1")
         password2 = data.get("password2")
 
@@ -58,10 +56,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         username = validated_data.get("username")
         password = validated_data.get("password1")
-
-        user = User(username=username)
-        user.set_password(password)
-        user.save()
+        user = User.objects.create_user(username=username, password=password)
 
         return user
 
